@@ -1,0 +1,81 @@
+DiscScout Java 26 build proof
+Generated: 2026-08-01T17:06:14.7296338-06:00
+
+java -version
+java version "26.0.2" 2026-07-21
+Java(TM) SE Runtime Environment (build 26.0.2+10-55)
+Java HotSpot(TM) 64-Bit Server VM (build 26.0.2+10-55, mixed mode, sharing)
+
+mvnw.cmd clean verify
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< dev.discscout:discscout >-----------------------
+[INFO] Building DiscScout 0.1.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ discscout ---
+[INFO] Deleting C:\dev\disk-golf\target
+[INFO] 
+[INFO] --- jacoco:0.8.15:prepare-agent (default) @ discscout ---
+[INFO] argLine set to -javaagent:C:\\Users\\Darcy\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.15\\org.jacoco.agent-0.8.15-runtime.jar=destfile=C:\\dev\\disk-golf\\target\\jacoco.exec
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ discscout ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ discscout ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 49 source files with javac [debug release 26 module-path] to target\classes
+[INFO] /C:/dev/disk-golf/src/main/java/dev/discscout/app/StartupLoader.java: C:\dev\disk-golf\src\main\java\dev\discscout\app\StartupLoader.java uses preview features of Java SE 26.
+[INFO] /C:/dev/disk-golf/src/main/java/dev/discscout/app/StartupLoader.java: Recompile with -Xlint:preview for details.
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ discscout ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ discscout ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 9 source files with javac [debug release 26 module-path] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ discscout ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.discscout.course.OverpassDiscGolfClientTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.424 s -- in dev.discscout.course.OverpassDiscGolfClientTest
+[INFO] Running dev.discscout.domain.WindTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.discscout.domain.WindTest
+[INFO] Running dev.discscout.geodesy.GeoCalculatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.discscout.geodesy.GeoCalculatorTest
+[INFO] Running dev.discscout.mobile.PhoneHelperServerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.129 s -- in dev.discscout.mobile.PhoneHelperServerTest
+[INFO] Running dev.discscout.persistence.ProjectStoreTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.145 s -- in dev.discscout.persistence.ProjectStoreTest
+[INFO] Running dev.discscout.physics.FlightSimulatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.discscout.physics.FlightSimulatorTest
+[INFO] Running dev.discscout.search.SearchRouteGeneratorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.discscout.search.SearchRouteGeneratorTest
+[INFO] Running dev.discscout.simulation.MonteCarloSimulatorTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in dev.discscout.simulation.MonteCarloSimulatorTest
+[INFO] Running dev.discscout.triangulation.TriangulatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.discscout.triangulation.TriangulatorTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.5.0:jar (default-jar) @ discscout ---
+[INFO] Building jar: C:\dev\disk-golf\target\discscout-0.1.0.jar
+[INFO] 
+[INFO] --- jacoco:0.8.15:report (report) @ discscout ---
+[INFO] Loading execution data file C:\dev\disk-golf\target\jacoco.exec
+[INFO] Analyzed bundle 'DiscScout' with 58 classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.823 s
+[INFO] Finished at: 2026-08-01T17:06:24-06:00
+[INFO] ------------------------------------------------------------------------
+
