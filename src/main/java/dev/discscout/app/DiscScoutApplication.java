@@ -52,12 +52,15 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -107,6 +110,8 @@ public final class DiscScoutApplication extends Application {
   private final TableView<TrackingObservation.ManualPoint> trackingTable = new TableView<>();
   private MediaPlayer mediaPlayer;
   private StackPane videoPane;
+  private Pane trackingOverlay;
+  private Label markSummary;
 
   @Override
   public void start(Stage stage) throws Exception {
@@ -284,6 +289,7 @@ public final class DiscScoutApplication extends Application {
     videoEmpty.getStyleClass().add("empty-title");
     videoPane = new StackPane(videoEmpty);
     videoPane.getStyleClass().add("video-pane");
+    configureTrackingOverlay();
     var importVideo = new Button("Import Video");
     importVideo.setOnAction(e -> importVideo(stage));
     var play = new Button("Play");
@@ -299,7 +305,7 @@ public final class DiscScoutApplication extends Application {
         missionCard("Step 2 of 6", "Load the phone video.", "The video helps DiscScout estimate speed and uncertainty, but the workflow can continue when footage is imperfect.", "Import Video, then continue to Mark Disc."),
         screenTitle("Load the throw video"),
         screenCaption("Native phone camera recordings are expected. If decoding fails, the project still works with manual observations."),
-        videoPane,
+        screenCaption("After import, DiscScout opens Mark Disc so you can click the visible disc in the video frame."),
         tools);
     box.setPadding(new Insets(18));
     VBox.setVgrow(videoPane, Priority.ALWAYS);
@@ -314,21 +320,27 @@ public final class DiscScoutApplication extends Application {
       trackingTable.getColumns().add(column("Y", p -> "%.1f".formatted(p.y())));
       trackingTable.getColumns().add(column("Confidence", p -> "%.2f".formatted(p.confidence())));
     }
-    var addPoint = new Button("Add Demo Mark");
-    addPoint.getStyleClass().add("primary-button");
+    var playMark = new Button("Play");
+    playMark.setOnAction(e -> { if (mediaPlayer != null) mediaPlayer.play(); });
+    var pauseMark = new Button("Pause");
+    pauseMark.setOnAction(e -> { if (mediaPlayer != null) mediaPlayer.pause(); });
+    var addPoint = new Button("Use Sample Marks");
     addPoint.setOnAction(e -> addTrackingPoint());
-    var delete = new Button("Delete Point");
-    delete.setOnAction(e -> trackingTable.getItems().remove(trackingTable.getSelectionModel().getSelectedItem()));
+    var undo = new Button("Undo Mark");
+    undo.setOnAction(e -> undoLastTrackingPoint());
+    var delete = new Button("Delete Selected");
+    delete.setOnAction(e -> deleteSelectedTrackingPoint());
     var next = new Button("Continue To Wind");
     next.setOnAction(e -> showStep(3));
-    var tools = new HBox(8, addPoint, delete, next);
+    var tools = new HBox(8, playMark, pauseMark, addPoint, undo, delete, next);
     tools.getStyleClass().add("command-row");
-    var empty = new Label("3 marks is enough to estimate; more visible marks can improve confidence. This build adds demo marks until true click-to-mark is implemented.");
-    empty.getStyleClass().add("screen-caption");
+    markSummary = new Label(markSummaryText());
+    markSummary.getStyleClass().add("screen-caption");
     var box = new VBox(12,
-        missionCard("Step 3 of 6", "Mark the disc in a few frames.", "DiscScout uses these observations to widen or shrink the search area honestly.", "Add demo marks now, then continue to Wind."),
+        missionCard("Step 3 of 6", "Click the disc in a few frames.", "DiscScout uses these observations to widen or shrink the search area honestly.", "Pause the video, click the disc, then continue to Wind."),
         screenTitle("Mark what you can see"),
-        empty,
+        markSummary,
+        videoPane,
         trackingTable,
         tools);
     box.setPadding(new Insets(18));
@@ -500,10 +512,21 @@ public final class DiscScoutApplication extends Application {
         throwType.getSelectionModel().getSelectedItem(),
         handedness.getSelectionModel().getSelectedItem(),
         new Wind(Double.parseDouble(windSpeed.getText()), Double.parseDouble(windDirection.getText()), Double.parseDouble(windGust.getText()), new WindSource.Manual("player editable input")),
-        MeasurementUncertainty.soloDefault());
+        uncertaintyFromTrackingMarks());
   }
 
 
+
+  private MeasurementUncertainty uncertaintyFromTrackingMarks() {
+    var marks = trackingTable.getItems().size();
+    if (marks < 2) {
+      return new MeasurementUncertainty(3.8, 15.0, 7.0, 10.0, 2.5, 25.0, 0.30, 22.0);
+    }
+    if (marks < 4) {
+      return MeasurementUncertainty.soloDefault();
+    }
+    return new MeasurementUncertainty(1.8, 6.0, 3.5, 5.0, 1.8, 18.0, 0.22, 7.0);
+  }
   private DiscProfile selectedDiscProfile() {
     var selected = disc.getSelectionModel().getSelectedItem();
     var weight = discWeight.getSelectionModel().getSelectedItem();
@@ -618,6 +641,55 @@ public final class DiscScoutApplication extends Application {
     }
   }
 
+
+  private void configureTrackingOverlay() {
+    trackingOverlay = new Pane();
+    trackingOverlay.getStyleClass().add("tracking-overlay");
+    trackingOverlay.setPickOnBounds(true);
+    trackingOverlay.prefWidthProperty().bind(videoPane.widthProperty());
+    trackingOverlay.prefHeightProperty().bind(videoPane.heightProperty());
+    trackingOverlay.setOnMouseClicked(event -> addTrackingPointFromClick(event.getX(), event.getY()));
+    videoPane.getChildren().add(trackingOverlay);
+    videoPane.widthProperty().addListener((obs, old, value) -> renderTrackingOverlay());
+    videoPane.heightProperty().addListener((obs, old, value) -> renderTrackingOverlay());
+  }
+
+  private void renderTrackingOverlay() {
+    if (trackingOverlay == null) return;
+    trackingOverlay.getChildren().clear();
+    var points = trackingTable.getItems();
+    for (var i = 1; i < points.size(); i++) {
+      var previous = points.get(i - 1);
+      var current = points.get(i);
+      var trail = new Line(previous.x(), previous.y(), current.x(), current.y());
+      trail.getStyleClass().add("tracking-trail");
+      trackingOverlay.getChildren().add(trail);
+    }
+    for (var i = 0; i < points.size(); i++) {
+      var point = points.get(i);
+      var marker = new Circle(point.x(), point.y(), 7);
+      marker.getStyleClass().add("tracking-marker");
+      marker.setMouseTransparent(true);
+      trackingOverlay.getChildren().add(marker);
+    }
+  }
+
+  private void updateMarkSummary() {
+    if (markSummary != null) {
+      markSummary.setText(markSummaryText());
+    }
+  }
+
+  private String markSummaryText() {
+    var count = trackingTable.getItems().size();
+    if (count == 0) {
+      return "No disc marks yet. Import a video, pause on a visible frame, and click the disc. Three marks is enough to continue.";
+    }
+    if (count < 3) {
+      return "%d disc mark(s). Add %d more visible mark(s) for a basic estimate.".formatted(count, 3 - count);
+    }
+    return "%d disc marks. Good enough to estimate; extra marks may improve confidence.".formatted(count);
+  }
   private void importVideo(Stage stage) {
     var chooser = new FileChooser();
     chooser.setTitle("Import phone video");
@@ -631,9 +703,10 @@ public final class DiscScoutApplication extends Application {
       mediaView.setPreserveRatio(true);
       mediaView.fitWidthProperty().bind(videoPane.widthProperty());
       mediaView.fitHeightProperty().bind(videoPane.heightProperty());
-      videoPane.getChildren().setAll(mediaView);
+      videoPane.getChildren().setAll(mediaView, trackingOverlay);
       project.primaryVideo = videoMetadataReader.read(file.toPath());
-      log("Video loaded: %.2f FPS, %dx%d, %.1f seconds. Use manual points when the disc is too small, occluded, or leaves frame."
+      renderTrackingOverlay();
+      log("Video loaded: %.2f FPS, %dx%d, %.1f seconds. Pause on visible frames and click the disc to add marks."
           .formatted(project.primaryVideo.frameRate(), project.primaryVideo.width(), project.primaryVideo.height(), project.primaryVideo.durationSeconds()));
       showStep(2);
     } catch (RuntimeException ex) {
@@ -643,8 +716,40 @@ public final class DiscScoutApplication extends Application {
 
   private void addTrackingPoint() {
     var next = trackingTable.getItems().size();
-    trackingTable.getItems().add(new TrackingObservation.ManualPoint(next * 5, 320 + next * 18, 220 - next * 8, 0.85));
-    log("Demo mark added. True click-to-mark on the video frame is the next tracking improvement.");
+    trackingTable.getItems().add(new TrackingObservation.ManualPoint(next * 5, 320 + next * 18, 220 - next * 8, 0.70));
+    updateMarkSummary();
+    renderTrackingOverlay();
+    log("Sample mark added. Click the video frame for real marks when a video is loaded.");
+  }
+
+  private void addTrackingPointFromClick(double x, double y) {
+    if (mediaPlayer == null || project.primaryVideo == null) {
+      log("Import a video before clicking to mark the disc.");
+      return;
+    }
+    var frame = Math.max(0, (int) Math.round(mediaPlayer.getCurrentTime().toSeconds() * project.primaryVideo.frameRate()));
+    trackingTable.getItems().add(new TrackingObservation.ManualPoint(frame, x, y, 0.95));
+    updateMarkSummary();
+    renderTrackingOverlay();
+    log("Marked disc at frame %d. %s".formatted(frame, markSummaryText()));
+  }
+
+  private void undoLastTrackingPoint() {
+    var items = trackingTable.getItems();
+    if (items.isEmpty()) return;
+    items.remove(items.size() - 1);
+    updateMarkSummary();
+    renderTrackingOverlay();
+    log("Removed the last disc mark. " + markSummaryText());
+  }
+
+  private void deleteSelectedTrackingPoint() {
+    var selected = trackingTable.getSelectionModel().getSelectedItem();
+    if (selected == null) return;
+    trackingTable.getItems().remove(selected);
+    updateMarkSummary();
+    renderTrackingOverlay();
+    log("Deleted the selected disc mark. " + markSummaryText());
   }
 
   private void fillInputsFromProject() {
@@ -652,6 +757,8 @@ public final class DiscScoutApplication extends Application {
     longitude.setText(Double.toString(project.releasePoint.longitude()));
     bearing.setText(Double.toString(project.bearingDegrees));
     trackingTable.setItems(FXCollections.observableArrayList(project.trackingPoints));
+    updateMarkSummary();
+    renderTrackingOverlay();
   }
 
   private DiscScoutProject sampleProject() {

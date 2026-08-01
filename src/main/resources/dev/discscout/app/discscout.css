@@ -207,3 +207,19 @@
   -fx-padding: 16px;
   -fx-effect: dropshadow(gaussian, rgba(20, 40, 28, 0.08), 8, 0.18, 0, 1);
 }
+.tracking-overlay {
+  -fx-background-color: transparent;
+  -fx-cursor: crosshair;
+}
+
+.tracking-marker {
+  -fx-fill: #ffdf4d;
+  -fx-stroke: #17211b;
+  -fx-stroke-width: 2px;
+}
+
+.tracking-trail {
+  -fx-stroke: #ffdf4d;
+  -fx-stroke-width: 2px;
+  -fx-opacity: 0.75;
+}

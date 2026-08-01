@@ -54,6 +54,10 @@ Use **Open Sample Project** from the welcome screen. The sample uses synthetic, 
 
 
 
+
+## Video Marking
+
+After importing a video, the Mark Disc step shows the video with a click overlay. Pause on frames where the disc is visible and click the disc. Marks appear as yellow points with a trail, and the table supports undo/delete. Three marks is enough to continue; four or more marks reduce the model's video-measurement uncertainty. If no usable video is available, **Use Sample Marks** keeps the demo path working.
 ## Public Course Lookup
 
 The Setup step can search public OpenStreetMap data near the current release coordinate. When mapped data exists, choose a course and tee; DiscScout fills the tee coordinate and uses a matching or nearest basket to suggest the throw direction.

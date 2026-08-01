@@ -31,6 +31,7 @@ Last updated: 2026-07-31
 - After Simple/Advanced Estimate UI pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 12 tests run, 0 failures, 0 errors, 0 skipped.
 - Automatic Wind step: wind now fetches from the tee coordinate when the user reaches the step; raw speed/direction fields are hidden under `Advanced wind override`.
 - Nearby course picker pass: added OSM/Overpass course, tee, and basket parser with fixture tests; Setup can search public OSM features and fill tee coordinate/bearing from selected data.
+- Click-to-mark pass: Mark Disc now displays the imported video, accepts click marks, draws marker/trail overlays, supports undo/delete, and adjusts simulation uncertainty from mark count.
 - Test result: 11 tests run, 0 failures, 0 errors, 0 skipped.
 - JaCoCo report generated at `target/site/jacoco/index.html`.
 
@@ -79,11 +80,11 @@ Goal: make DiscScout feel like a guided lost-disc rescue assistant for beginners
 
 ### Phase 4: Tracking Interaction Honesty
 
-- [ ] Make the current tracking placeholder explicit: `Add Demo Mark` until true click-to-mark exists.
-- [ ] Implement real click-to-mark on the displayed video frame.
+- [x] Make the current tracking placeholder explicit: `Use Sample Marks` as a fallback while true click-to-mark exists for imported videos.
+- [x] Implement real click-to-mark on the displayed video frame.
 - [ ] Add release-frame selection and frame-step buttons.
-- [ ] Show point count feedback: `3 marks is enough to estimate; more marks can improve confidence`.
-- [ ] Add undo/delete controls with visible selected-point feedback.
+- [x] Show point count feedback: `3 marks is enough to estimate; more marks can improve confidence`.
+- [x] Add undo/delete controls for tracking points; selected-point visual feedback remains pending.
 
 ### Phase 5: Map and Search Confidence
 
