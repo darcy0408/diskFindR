@@ -1,0 +1,1 @@
+﻿DiscScout estimates a probabilistic disc-golf landing search area from phone video, release location, throw direction, wind, and disc profile using a Java 26 JavaFX desktop app.

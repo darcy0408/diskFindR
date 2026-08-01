@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DiscScout Map</title>
+  <style>
+    html, body { margin: 0; block-size: 100%; font-family: system-ui, sans-serif; }
+    body { display: grid; grid-template-rows: auto 1fr; background: #edf3ea; color: #17231c; }
+    body.dark { background: #141c18; color: #eef5ed; }
+    .bar { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; padding: .55rem .7rem; background: #f7f8f2; border-block-end: 1px solid #cbd8ca; }
+    .dark .bar { background: #202c25; border-color: #425349; }
+    .pill { display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .5rem; border-radius: 999px; background: #e5eee0; border: 1px solid #b9cbb8; white-space: nowrap; }
+    .dark .pill { background: #2d3a32; border-color: #52675a; }
+    button { border: 1px solid #9db49f; border-radius: 6px; background: white; color: #17231c; padding: .25rem .55rem; font: inherit; cursor: pointer; }
+    .dark button { background: #18211c; color: #eef5ed; border-color: #52675a; }
+    #map { position: relative; overflow: hidden; min-block-size: 420px; background: #d8e2d2; }
+    .tile { position: absolute; inline-size: 256px; block-size: 256px; image-rendering: auto; }
+    .tile-missing { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 1rem; background: linear-gradient(135deg, #d9e5d5, #f4f0dd); color: #243229; }
+    .dark .tile-missing { background: linear-gradient(135deg, #1b2a22, #2a2c20); color: #eef5ed; }
+    .marker { position: absolute; inline-size: 18px; block-size: 18px; border-radius: 50%; transform: translate(-50%, -50%); border: 3px solid white; box-shadow: 0 1px 8px #0009; z-index: 20; }
+    .release { background: #1e7d4e; }
+    .median { background: #d43d2b; }
+    .ellipse { position: absolute; border-radius: 50%; transform: translate(-50%, -50%) rotate(var(--angle)); pointer-events: none; z-index: 12; }
+    .p50 { border: 3px solid rgba(28,111,75,.95); background: rgba(28,111,75,.16); }
+    .p80 { border: 3px solid rgba(218,148,25,.95); background: rgba(218,148,25,.14); }
+    .p95 { border: 3px solid rgba(195,52,42,.9); background: rgba(195,52,42,.11); }
+    .arrow { position: absolute; block-size: 4px; background: #24628e; transform-origin: left center; z-index: 15; box-shadow: 0 1px 4px #fff; }
+    #routeLayer { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; z-index: 16; pointer-events: none; }
+    .route-line { fill: none; stroke: #185f9e; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 8 8; filter: drop-shadow(0 1px 2px #fff); }
+    .legend, .note, .attribution { position: absolute; z-index: 30; border: 1px solid #b8c8b6; border-radius: 7px; background: #ffffffe8; box-shadow: 0 2px 12px #0002; }
+    .dark .legend, .dark .note, .dark .attribution { background: #101914e8; border-color: #4b5d52; }
+    .legend { inset-inline-start: .75rem; inset-block-start: .75rem; display: grid; gap: .35rem; padding: .55rem .65rem; }
+    .legend-row { display: flex; align-items: center; gap: .45rem; white-space: nowrap; }
+    .swatch { inline-size: .9rem; block-size: .9rem; border-radius: 50%; border: 2px solid currentColor; }
+    .note { inset-inline-start: .75rem; inset-block-end: .75rem; max-inline-size: min(620px, calc(100% - 1.5rem)); padding: .55rem .7rem; }
+    .attribution { inset-inline-end: .75rem; inset-block-end: .75rem; padding: .25rem .45rem; font-size: .78rem; }
+    .zoom { margin-inline-start: auto; display: flex; gap: .35rem; }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <strong>Search map</strong>
+    <span id="coords" class="pill">Waiting for simulation</span>
+    <span id="confidence" class="pill">Confidence: not run</span>
+    <span class="zoom"><button type="button" onclick="zoomBy(1)">+</button><button type="button" onclick="zoomBy(-1)">-</button></span>
+  </div>
+  <div id="map">
+    <div id="tiles"></div>
+    <div id="missing" class="tile-missing">Map tiles have not loaded yet. Probability overlays still work.</div>
+    <div id="p95" class="ellipse p95"></div>
+    <div id="p80" class="ellipse p80"></div>
+    <div id="p50" class="ellipse p50"></div>
+    <svg id="routeLayer" aria-hidden="true"><path id="routePath" class="route-line"></path></svg>
+    <div id="arrow" class="arrow"></div>
+    <div id="release" class="marker release" title="Release coordinate"></div>
+    <div id="median" class="marker median" title="Median search anchor"></div>
+    <div class="legend">
+      <div class="legend-row"><span class="swatch" style="color:#1c6f4b"></span>50 percent</div>
+      <div class="legend-row"><span class="swatch" style="color:#da9419"></span>80 percent</div>
+      <div class="legend-row"><span class="swatch" style="color:#c3342a"></span>95 percent</div>
+      <div class="legend-row"><span class="swatch" style="color:#185f9e"></span>search route</div>
+    </div>
+    <div id="note" class="note"></div>
+    <div id="attribution" class="attribution"></div>
+  </div>
+  <script>
+    let lastData = null;
+    let zoom = 17;
+
+    window.discScoutSetData = (data) => {
+      lastData = data;
+      render();
+    };
+
+    function zoomBy(delta) {
+      zoom = Math.max(13, Math.min(19, zoom + delta));
+      render();
+    }
+
+    function render() {
+      if (!lastData) return;
+      const data = lastData;
+      const map = document.getElementById('map');
+      const w = map.clientWidth || 900;
+      const h = map.clientHeight || 520;
+      const center = lonLatToPixel(data.median.lon, data.median.lat, zoom);
+      const releasePx = lonLatToPixel(data.release.lon, data.release.lat, zoom);
+      const medianX = w / 2;
+      const medianY = h / 2;
+      const releaseX = medianX + (releasePx.x - center.x);
+      const releaseY = medianY + (releasePx.y - center.y);
+
+      renderTiles(w, h, center, data.tileUrl);
+      renderRoute(data.route || [], center, w, h);
+      place('release', releaseX, releaseY);
+      place('median', medianX, medianY);
+      ellipse('p50', medianX, medianY, data.ellipses[0], data.orientation);
+      ellipse('p80', medianX, medianY, data.ellipses[1], data.orientation);
+      ellipse('p95', medianX, medianY, data.ellipses[2], data.orientation);
+
+      const arrow = document.getElementById('arrow');
+      const len = Math.hypot(medianX - releaseX, medianY - releaseY);
+      arrow.style.inlineSize = Math.max(1, len) + 'px';
+      arrow.style.insetInlineStart = releaseX + 'px';
+      arrow.style.insetBlockStart = releaseY + 'px';
+      arrow.style.transform = `rotate(${Math.atan2(medianY - releaseY, medianX - releaseX)}rad)`;
+
+      document.getElementById('coords').textContent = `Median ${data.median.lat.toFixed(5)}, ${data.median.lon.toFixed(5)}`;
+      document.getElementById('confidence').textContent = `Confidence: ${data.confidence}`;
+      document.getElementById('note').textContent = data.message;
+      document.getElementById('attribution').textContent = data.attribution;
+    }
+
+    function renderTiles(w, h, center, template) {
+      const tiles = document.getElementById('tiles');
+      tiles.replaceChildren();
+      const startX = Math.floor((center.x - w / 2) / 256);
+      const endX = Math.floor((center.x + w / 2) / 256);
+      const startY = Math.floor((center.y - h / 2) / 256);
+      const endY = Math.floor((center.y + h / 2) / 256);
+      let loaded = 0;
+      const missing = document.getElementById('missing');
+      missing.style.display = 'grid';
+      for (let x = startX; x <= endX; x++) {
+        for (let y = startY; y <= endY; y++) {
+          const img = document.createElement('img');
+          img.className = 'tile';
+          img.alt = '';
+          img.decoding = 'async';
+          img.src = template.replace('{z}', zoom).replace('{x}', x).replace('{y}', y);
+          img.style.insetInlineStart = (x * 256 - center.x + w / 2) + 'px';
+          img.style.insetBlockStart = (y * 256 - center.y + h / 2) + 'px';
+          img.onload = () => { loaded += 1; if (loaded > 2) missing.style.display = 'none'; };
+          tiles.appendChild(img);
+        }
+      }
+    }
+
+    function renderRoute(route, center, w, h) {
+      const path = document.getElementById('routePath');
+      if (!route.length) {
+        path.setAttribute('d', '');
+        return;
+      }
+      const d = route.map((point, index) => {
+        const px = lonLatToPixel(point.lon, point.lat, zoom);
+        const x = px.x - center.x + w / 2;
+        const y = px.y - center.y + h / 2;
+        return `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+      }).join(' ');
+      path.setAttribute('d', d);
+    }
+
+    function lonLatToPixel(lon, lat, z) {
+      const scale = 256 * Math.pow(2, z);
+      const x = (lon + 180) / 360 * scale;
+      const sin = Math.sin(lat * Math.PI / 180);
+      const y = (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * scale;
+      return { x, y };
+    }
+
+    function place(id, x, y) {
+      const el = document.getElementById(id);
+      el.style.insetInlineStart = x + 'px';
+      el.style.insetBlockStart = y + 'px';
+    }
+
+    function ellipse(id, x, y, radiusMeters, angle) {
+      const el = document.getElementById(id);
+      const px = Math.max(34, radiusMeters * 2.4);
+      el.style.inlineSize = px + 'px';
+      el.style.blockSize = (px * .58) + 'px';
+      el.style.setProperty('--angle', `${angle || 0}deg`);
+      place(id, x, y);
+    }
+  </script>
+</body>
+</html>

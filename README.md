@@ -1,0 +1,68 @@
+# DiscScout
+
+DiscScout is a Java 26 JavaFX desktop application for estimating the probable landing area of a disc-golf throw from phone video, release location, throw direction, wind, and disc profile.
+
+The application deliberately shows probability regions instead of claiming an exact coordinate. Trees, skips, rolls, wind shifts, camera angle, and disc behavior can all move the actual disc.
+
+## Requirements
+
+- JDK 26 on `PATH`
+- Windows PowerShell
+- Internet access for first Maven dependency download and optional Open-Meteo wind lookup
+
+This workspace includes an ignored portable Oracle JDK 26.0.2 under `.jdk/` for local verification. The scripts use it automatically when present; otherwise install/select JDK 26 before running the authoritative verification command.
+
+## Build
+
+```powershell
+.\build.ps1
+```
+
+## Run
+
+```powershell
+.\run.ps1
+```
+
+or:
+
+```powershell
+.\mvnw.cmd javafx:run
+```
+
+
+## Guided Demo Flow
+
+The main screen is organized as **Record -> Import -> Mark -> Wind -> Simulate -> Search**. For the fastest walkthrough, choose **Open Sample Project**; DiscScout loads synthetic data, runs the seeded simulation, and opens the Search screen with probability regions and a route preview.
+
+The map uses OpenStreetMap tiles by default and keeps overlays working even when aerial credentials are missing or tiles fail to load.
+## Aerial Map Key
+
+DiscScout works without aerial credentials by falling back to an OpenStreetMap-compatible development basemap. To use MapTiler satellite tiles, create `config/local.properties` or set environment variables:
+
+```text
+MAP_PROVIDER=maptiler
+MAPTILER_KEY=your-key
+```
+
+Do not commit local credentials.
+
+## Sample Project
+
+Use **Open Sample Project** from the welcome screen. The sample uses synthetic, non-personal coordinates and generated tracking observations.
+
+
+
+## Simple and Advanced Estimate
+
+The Estimate step defaults to Simple Mode with disc type, disc weight, throw style, handedness, and throw direction. Open **Advanced model details** to edit release coordinates, release speed, launch angle, and hyzer/anhyzer angle.
+## Wind and Disc Details
+
+On the Wind step, DiscScout automatically uses the current release latitude and longitude to query Open-Meteo. Raw wind speed, direction, and gust fields are hidden in **Advanced wind override** because most players will not know those values. If weather is unavailable, the app can continue with a wider search zone.
+
+On the Estimate step, disc type and disc weight class both feed the simulation. Lighter discs are modeled as slightly more wind-sensitive; heavier discs are modeled as slightly less wind-sensitive. These are approximate inputs, not full aerodynamic measurements.
+## Safety
+
+The predicted area is an estimate, not a guarantee. Do not enter roads, water, cliffs, private property, restricted areas, or unsafe terrain. DiscScout is not a navigation or emergency-location system.
+
+

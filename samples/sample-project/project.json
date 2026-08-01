@@ -1,0 +1,16 @@
+{
+  "id" : "sample",
+  "name" : "DiscScout Sample Project",
+  "createdAt" : "2026-07-31T00:00:00Z",
+  "updatedAt" : "2026-07-31T00:00:00Z",
+  "captureMode" : "Solo Mode - One Phone",
+  "releasePoint" : { "latitude" : 39.7392, "longitude" : -104.9903 },
+  "bearingDegrees" : 42.0,
+  "primaryVideo" : null,
+  "trackingPoints" : [
+    { "frame" : 105, "x" : 301.0, "y" : 260.0, "confidence" : 0.9 },
+    { "frame" : 110, "x" : 344.0, "y" : 238.0, "confidence" : 0.85 },
+    { "frame" : 115, "x" : 389.0, "y" : 221.0, "confidence" : 0.8 }
+  ],
+  "simulationSeed" : 20260731
+}

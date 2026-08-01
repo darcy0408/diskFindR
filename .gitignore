@@ -1,0 +1,25 @@
+target/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Local configuration and secrets
+config/local.properties
+*.env
+
+# User media and generated private artifacts
+projects/
+uploads/
+diagnostics/
+*.mp4
+*.mov
+*.m4v
+*.avi
+
+
+# Local portable JDK used for verification
+.jdk/
+
+# Local review screenshots
+docs/screenshots/
