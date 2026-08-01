@@ -58,6 +58,12 @@ Use **Open Sample Project** from the welcome screen. The sample uses synthetic, 
 ## Video Marking
 
 After importing a video, the Mark Disc step shows the video with a click overlay. Pause on frames where the disc is visible and click the disc. Marks appear as yellow points with a trail, and the table supports undo/delete. Three marks is enough to continue; four or more marks reduce the model's video-measurement uncertainty. If no usable video is available, **Use Sample Marks** keeps the demo path working.
+
+## Phone Helper
+
+The Setup step can start a local phone helper page with a six-digit session code. The page asks the browser for location only after the user taps **Use My Location For Tee**, then sends the coordinate back to the desktop app to fill the release point.
+
+The helper runs locally and does not create an account. Exact coordinates are not written to the diagnostic log. Many mobile browsers require HTTPS for geolocation on local-network URLs, so if a phone blocks location, use public course lookup or manual placement.
 ## Public Course Lookup
 
 The Setup step can search public OpenStreetMap data near the current release coordinate. When mapped data exists, choose a course and tee; DiscScout fills the tee coordinate and uses a matching or nearest basket to suggest the throw direction.

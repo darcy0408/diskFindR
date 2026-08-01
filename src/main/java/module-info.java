@@ -1,5 +1,6 @@
 module dev.discscout {
   requires java.net.http;
+  requires jdk.httpserver;
   requires javafx.controls;
   requires javafx.web;
   requires javafx.media;
@@ -11,6 +12,8 @@ module dev.discscout {
   exports dev.discscout.course;
   exports dev.discscout.domain;
   exports dev.discscout.geodesy;
+  exports dev.discscout.mapping;
+  exports dev.discscout.mobile;
   exports dev.discscout.physics;
   exports dev.discscout.simulation;
   exports dev.discscout.search;

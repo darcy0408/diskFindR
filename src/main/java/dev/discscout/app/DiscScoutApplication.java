@@ -14,6 +14,8 @@ import dev.discscout.domain.TrackingObservation;
 import dev.discscout.domain.Wind;
 import dev.discscout.domain.WindSource;
 import dev.discscout.export.ExportService;
+import dev.discscout.mobile.PhoneHelperServer;
+import dev.discscout.mobile.PhoneLocationUpdate;
 import dev.discscout.persistence.DiscScoutProject;
 import dev.discscout.persistence.ProjectStore;
 import dev.discscout.physics.FlightSimulator;
@@ -90,7 +92,9 @@ public final class DiscScoutApplication extends Application {
   private Label videoEmpty;
   private Label windSummary;
   private Label courseSummary;
+  private Label phoneHelperSummary;
   private boolean attemptedWindFetch;
+  private PhoneHelperServer phoneHelperServer;
   private WebEngine mapEngine;
   private TextField latitude;
   private TextField longitude;
@@ -131,6 +135,13 @@ public final class DiscScoutApplication extends Application {
     stage.setScene(scene);
     stage.show();
     refreshMap();
+  }
+
+  @Override
+  public void stop() {
+    if (phoneHelperServer != null) {
+      phoneHelperServer.close();
+    }
   }
 
   public static void main(String[] args) {
@@ -207,11 +218,65 @@ public final class DiscScoutApplication extends Application {
     cards.add(solo, 1, 0);
     cards.add(how, 0, 1);
     cards.add(precision, 1, 1);
-    var body = new VBox(18, cards, courseFinderPane());
+    var body = new VBox(18, cards, phoneHelperPane(), courseFinderPane());
     return page(missionCard("Step 1 of 6", "Choose how you want to start.", "The sample is safest for a quick demo. Solo Search is the simplest real course workflow.", "Open Sample Project, Start Solo Search, or use public OSM course data."), title, caption, body);
   }
 
 
+
+  private Node phoneHelperPane() {
+    phoneHelperSummary = new Label("Optional: start a local phone helper page to send the tee location back to DiscScout after browser location permission. On many phones, geolocation requires HTTPS; if the browser blocks it, use public course lookup or manual placement.");
+    phoneHelperSummary.getStyleClass().add("screen-caption");
+    var start = new Button("Start Phone Helper");
+    start.getStyleClass().add("primary-button");
+    start.setOnAction(e -> startPhoneHelper());
+    var stop = new Button("Stop Helper");
+    stop.setOnAction(e -> stopPhoneHelper());
+    var controls = new HBox(8, start, stop);
+    controls.getStyleClass().add("command-row");
+    var box = new VBox(8, screenTitle("Use phone location"), phoneHelperSummary, controls);
+    box.getStyleClass().add("lookup-card");
+    return box;
+  }
+
+  private void startPhoneHelper() {
+    try {
+      if (phoneHelperServer == null) {
+        phoneHelperServer = new PhoneHelperServer(this::acceptPhoneLocation);
+      }
+      phoneHelperServer.start();
+      phoneHelperSummary.setText("Phone helper running. Session %s. Open %s on this computer, or try %s from a phone on the same network. If phone geolocation is blocked, use public course lookup or manual placement.".formatted(
+          phoneHelperServer.sessionCode(), phoneHelperServer.localUrl(), phoneHelperServer.networkUrl()));
+      log("Phone helper started with session " + phoneHelperServer.sessionCode() + ". No location is stored until the user sends it from the helper page.");
+    } catch (RuntimeException ex) {
+      phoneHelperSummary.setText("Could not start the phone helper. Use public course lookup or manual placement.");
+      log("Phone helper failed to start: " + ex.getMessage());
+    }
+  }
+
+  private void stopPhoneHelper() {
+    if (phoneHelperServer != null) {
+      phoneHelperServer.close();
+      phoneHelperServer = null;
+    }
+    if (phoneHelperSummary != null) {
+      phoneHelperSummary.setText("Phone helper stopped. Start it again when you want to send a tee location from a browser.");
+    }
+  }
+
+  private void acceptPhoneLocation(PhoneLocationUpdate update) {
+    Platform.runLater(() -> {
+      latitude.setText("%.6f".formatted(update.coordinate().latitude()));
+      longitude.setText("%.6f".formatted(update.coordinate().longitude()));
+      attemptedWindFetch = false;
+      refreshMap();
+      var accuracy = update.accuracyMeters() >= 0.0 ? " about %.0f m accuracy".formatted(update.accuracyMeters()) : " unknown accuracy";
+      if (phoneHelperSummary != null) {
+        phoneHelperSummary.setText("Received tee location from %s with%s. Release coordinate updated; you can still correct it in Advanced model details.".formatted(update.label(), accuracy));
+      }
+      log("Phone helper received a tee location and updated the release coordinate. Exact coordinates are not written to the log.");
+    });
+  }
   private Node courseFinderPane() {
     courseSummary = new Label("Optional: find public OpenStreetMap course and tee data near the current release coordinate. Device location permission will be added with the phone helper page; this desktop step does not store your location.");
     courseSummary.getStyleClass().add("screen-caption");

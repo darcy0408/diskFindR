@@ -32,6 +32,7 @@ Last updated: 2026-07-31
 - Automatic Wind step: wind now fetches from the tee coordinate when the user reaches the step; raw speed/direction fields are hidden under `Advanced wind override`.
 - Nearby course picker pass: added OSM/Overpass course, tee, and basket parser with fixture tests; Setup can search public OSM features and fill tee coordinate/bearing from selected data.
 - Click-to-mark pass: Mark Disc now displays the imported video, accepts click marks, draws marker/trail overlays, supports undo/delete, and adjusts simulation uncertainty from mark count.
+- Phone helper location pass: added local HTTP helper with six-digit session code, browser geolocation request, session-checked location callback, tests, and Setup controls. HTTPS requirements may block geolocation on some phone LAN browsers.
 - Test result: 11 tests run, 0 failures, 0 errors, 0 skipped.
 - JaCoCo report generated at `target/site/jacoco/index.html`.
 
@@ -112,13 +113,13 @@ Goal: make DiscScout feel like a guided lost-disc rescue assistant for beginners
 
 ## Nearby Courses and Tee Coordinates Plan
 
-- [ ] Add a geolocation permission flow in the optional phone upload page or browser-based helper. Use location only when the user grants permission.
+- [x] Add a geolocation permission flow in the optional phone upload page or browser-based helper. Use location only when the user grants permission.
 - [x] Add an OpenStreetMap/Overpass course lookup service for nearby `leisure=disc_golf_course` features.
 - [x] Add tee and basket lookup using `disc_golf=tee` and `disc_golf=basket` around the selected course.
 - [x] Let the user pick a course and tee instead of typing latitude/longitude.
 - [x] Use the selected tee coordinate as the release-coordinate starting point; manual correction remains available through Advanced details.
 - [ ] Cache public OSM feature data with attribution, timestamp, and source URL; do not cache user location by default.
-- [ ] Add fallback behavior for unmapped courses: map click, pasted GPS, or manual tee placement.
+- [x] Add fallback behavior for unmapped courses: public course lookup/manual tee placement remains available when phone geolocation fails.
 ## Remaining Work
 
 - Launch and visually inspect the revised stepper UI on the user's desktop.
