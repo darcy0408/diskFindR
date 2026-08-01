@@ -53,6 +53,12 @@ Use **Open Sample Project** from the welcome screen. The sample uses synthetic, 
 
 
 
+
+## Public Course Lookup
+
+The Setup step can search public OpenStreetMap data near the current release coordinate. When mapped data exists, choose a course and tee; DiscScout fills the tee coordinate and uses a matching or nearest basket to suggest the throw direction.
+
+OSM data may be incomplete or slightly wrong, so every filled value remains editable. The desktop app does not store device location; future phone-helper geolocation should request explicit browser permission and use the result only to suggest nearby courses.
 ## Simple and Advanced Estimate
 
 The Estimate step defaults to Simple Mode with disc type, disc weight, throw style, handedness, and throw direction. Open **Advanced model details** to edit release coordinates, release speed, launch angle, and hyzer/anhyzer angle.

@@ -1,0 +1,46 @@
+{
+  "version": 0.6,
+  "generator": "fixture",
+  "elements": [
+    {
+      "type": "node",
+      "id": 100,
+      "lat": 39.739200,
+      "lon": -104.990300,
+      "tags": {
+        "leisure": "disc_golf_course",
+        "name": "Fixture Park Disc Golf"
+      }
+    },
+    {
+      "type": "node",
+      "id": 101,
+      "lat": 39.739200,
+      "lon": -104.990300,
+      "tags": {
+        "disc_golf": "tee",
+        "ref": "1"
+      }
+    },
+    {
+      "type": "node",
+      "id": 102,
+      "lat": 39.740100,
+      "lon": -104.989500,
+      "tags": {
+        "disc_golf": "basket",
+        "ref": "1"
+      }
+    },
+    {
+      "type": "node",
+      "id": 103,
+      "lat": 39.738900,
+      "lon": -104.990900,
+      "tags": {
+        "disc_golf": "tee",
+        "ref": "2"
+      }
+    }
+  ]
+}

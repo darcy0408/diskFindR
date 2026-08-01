@@ -8,6 +8,7 @@ module dev.discscout {
   requires org.bytedeco.javacv;
 
   exports dev.discscout.app;
+  exports dev.discscout.course;
   exports dev.discscout.domain;
   exports dev.discscout.geodesy;
   exports dev.discscout.physics;

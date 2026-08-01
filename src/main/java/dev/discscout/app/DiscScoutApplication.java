@@ -1,5 +1,8 @@
 package dev.discscout.app;
 
+import dev.discscout.course.DiscGolfCourse;
+import dev.discscout.course.DiscGolfTee;
+import dev.discscout.course.OverpassDiscGolfClient;
 import dev.discscout.domain.DiscProfile;
 import dev.discscout.domain.DiscWeightClass;
 import dev.discscout.domain.GeoPoint;
@@ -70,6 +73,7 @@ public final class DiscScoutApplication extends Application {
   private final SearchRouteGenerator routeGenerator = new SearchRouteGenerator();
   private final VideoMetadataReader videoMetadataReader = new VideoMetadataReader();
   private final OpenMeteoWindClient windClient = new OpenMeteoWindClient();
+  private final OverpassDiscGolfClient courseClient = new OverpassDiscGolfClient();
   private StartupContext startupContext;
   private DiscScoutProject project = sampleProject();
   private Path projectDir = Path.of("projects", "sample");
@@ -82,6 +86,7 @@ public final class DiscScoutApplication extends Application {
   private Label resultSummary;
   private Label videoEmpty;
   private Label windSummary;
+  private Label courseSummary;
   private boolean attemptedWindFetch;
   private WebEngine mapEngine;
   private TextField latitude;
@@ -93,6 +98,8 @@ public final class DiscScoutApplication extends Application {
   private TextField windSpeed;
   private TextField windDirection;
   private TextField windGust;
+  private ComboBox<DiscGolfCourse> nearbyCourses;
+  private ComboBox<DiscGolfTee> nearbyTees;
   private ComboBox<DiscProfile> disc;
   private ComboBox<DiscWeightClass> discWeight;
   private ComboBox<ThrowType> throwType;
@@ -195,9 +202,83 @@ public final class DiscScoutApplication extends Application {
     cards.add(solo, 1, 0);
     cards.add(how, 0, 1);
     cards.add(precision, 1, 1);
-    return page(missionCard("Step 1 of 6", "Choose how you want to start.", "The sample is safest for a quick demo. Solo Search is the simplest real course workflow.", "Open Sample Project or Start Solo Search."), title, caption, cards);
+    var body = new VBox(18, cards, courseFinderPane());
+    return page(missionCard("Step 1 of 6", "Choose how you want to start.", "The sample is safest for a quick demo. Solo Search is the simplest real course workflow.", "Open Sample Project, Start Solo Search, or use public OSM course data."), title, caption, body);
   }
 
+
+  private Node courseFinderPane() {
+    courseSummary = new Label("Optional: find public OpenStreetMap course and tee data near the current release coordinate. Device location permission will be added with the phone helper page; this desktop step does not store your location.");
+    courseSummary.getStyleClass().add("screen-caption");
+    var find = new Button("Find Nearby Courses");
+    find.getStyleClass().add("primary-button");
+    find.setOnAction(e -> findNearbyCourses());
+    var useTee = new Button("Use Selected Tee");
+    useTee.setOnAction(e -> useSelectedTee());
+    var controls = new HBox(8, find, nearbyCourses, nearbyTees, useTee);
+    controls.getStyleClass().add("command-row");
+    var box = new VBox(8, screenTitle("Public course lookup"), courseSummary, controls);
+    box.getStyleClass().add("lookup-card");
+    return box;
+  }
+
+  private void findNearbyCourses() {
+    final GeoPoint point;
+    try {
+      point = new GeoPoint(Double.parseDouble(latitude.getText()), Double.parseDouble(longitude.getText()));
+    } catch (RuntimeException ex) {
+      courseSummary.setText("Open Advanced model details and enter a valid latitude/longitude, or use the sample project first.");
+      return;
+    }
+    courseSummary.setText("Searching public OpenStreetMap disc-golf data near the current coordinate...");
+    CompletableFuture
+        .supplyAsync(() -> courseClient.nearbyCourses(point, 5_000))
+        .thenAccept(courses -> Platform.runLater(() -> {
+          nearbyCourses.setItems(FXCollections.observableArrayList(courses));
+          if (!courses.isEmpty()) {
+            nearbyCourses.getSelectionModel().selectFirst();
+            populateTeesForSelectedCourse();
+            courseSummary.setText("Found %d public OSM course result(s). Pick the course and tee, then choose Use Selected Tee. OSM data may be incomplete, so you can still correct it manually.".formatted(courses.size()));
+          } else {
+            nearbyTees.setItems(FXCollections.observableArrayList());
+            courseSummary.setText("No mapped public OSM disc-golf tees found nearby. Use map/manual release placement for this course.");
+          }
+        }))
+        .exceptionally(ex -> {
+          Platform.runLater(() -> courseSummary.setText("Course lookup failed. Use manual release placement; the rest of DiscScout still works."));
+          return null;
+        });
+  }
+
+  private void populateTeesForSelectedCourse() {
+    var selected = nearbyCourses.getSelectionModel().getSelectedItem();
+    if (selected == null) {
+      nearbyTees.setItems(FXCollections.observableArrayList());
+      return;
+    }
+    nearbyTees.setItems(FXCollections.observableArrayList(selected.tees()));
+    if (!selected.tees().isEmpty()) {
+      nearbyTees.getSelectionModel().selectFirst();
+    }
+  }
+
+  private void useSelectedTee() {
+    var course = nearbyCourses.getSelectionModel().getSelectedItem();
+    var tee = nearbyTees.getSelectionModel().getSelectedItem();
+    if (course == null || tee == null) {
+      courseSummary.setText("Pick a course and tee first. If none are listed, use manual release placement.");
+      return;
+    }
+    latitude.setText("%.6f".formatted(tee.coordinate().latitude()));
+    longitude.setText("%.6f".formatted(tee.coordinate().longitude()));
+    var suggestedBearing = course.suggestedBearingFor(tee);
+    suggestedBearing.ifPresent(value -> bearing.setText("%.1f".formatted(value)));
+    attemptedWindFetch = false;
+    refreshMap();
+    courseSummary.setText(suggestedBearing.isPresent()
+        ? "Using %s at %s. Throw direction filled from matching/nearest basket. You can still correct it in Estimate.".formatted(tee, course.name())
+        : "Using %s at %s. Basket direction was not mapped, so keep or edit the throw direction in Estimate.".formatted(tee, course.name()));
+  }
   private Node importPane(Stage stage) {
     videoEmpty = new Label("No video yet. Import an MP4/MOV from your phone, or use Open Sample Project from Setup to try DiscScout without your own footage.");
     videoEmpty.getStyleClass().add("empty-title");
@@ -366,6 +447,13 @@ public final class DiscScoutApplication extends Application {
     speed = slider(4, 35, 22);
     launch = slider(-5, 30, 8);
     hyzer = slider(-25, 25, 0);
+    nearbyCourses = new ComboBox<>();
+    nearbyCourses.setPromptText("Find courses first");
+    nearbyCourses.setPrefWidth(360);
+    nearbyCourses.setOnAction(e -> populateTeesForSelectedCourse());
+    nearbyTees = new ComboBox<>();
+    nearbyTees.setPromptText("Pick a tee");
+    nearbyTees.setPrefWidth(220);
     windSpeed = field("2.5");
     windDirection = field("270");
     windGust = field("4.0");

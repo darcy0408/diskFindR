@@ -30,6 +30,7 @@ Last updated: 2026-07-31
 - After live tee-wind and disc-weight pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 12 tests run, 0 failures, 0 errors, 0 skipped.
 - After Simple/Advanced Estimate UI pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 12 tests run, 0 failures, 0 errors, 0 skipped.
 - Automatic Wind step: wind now fetches from the tee coordinate when the user reaches the step; raw speed/direction fields are hidden under `Advanced wind override`.
+- Nearby course picker pass: added OSM/Overpass course, tee, and basket parser with fixture tests; Setup can search public OSM features and fill tee coordinate/bearing from selected data.
 - Test result: 11 tests run, 0 failures, 0 errors, 0 skipped.
 - JaCoCo report generated at `target/site/jacoco/index.html`.
 
@@ -111,10 +112,10 @@ Goal: make DiscScout feel like a guided lost-disc rescue assistant for beginners
 ## Nearby Courses and Tee Coordinates Plan
 
 - [ ] Add a geolocation permission flow in the optional phone upload page or browser-based helper. Use location only when the user grants permission.
-- [ ] Add an OpenStreetMap/Overpass course lookup service for nearby `leisure=disc_golf_course` features.
-- [ ] Add tee, basket, and hole lookup using `disc_golf=tee`, `disc_golf=basket`, and `disc_golf=hole` around the selected course.
-- [ ] Let the user pick a course and tee instead of typing latitude/longitude.
-- [ ] Use the selected tee coordinate as the release-coordinate starting point and allow dragging/correction on the map.
+- [x] Add an OpenStreetMap/Overpass course lookup service for nearby `leisure=disc_golf_course` features.
+- [x] Add tee and basket lookup using `disc_golf=tee` and `disc_golf=basket` around the selected course.
+- [x] Let the user pick a course and tee instead of typing latitude/longitude.
+- [x] Use the selected tee coordinate as the release-coordinate starting point; manual correction remains available through Advanced details.
 - [ ] Cache public OSM feature data with attribution, timestamp, and source URL; do not cache user location by default.
 - [ ] Add fallback behavior for unmapped courses: map click, pasted GPS, or manual tee placement.
 ## Remaining Work
