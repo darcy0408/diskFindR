@@ -10,7 +10,7 @@
 - [x] Public OSM course/tee lookup is implemented with manual fallback.
 - [x] Local phone helper exists for optional browser location permission.
 - [x] Java 26 build proof is captured in `submission/build-proof-java26.txt`.
-- [x] Latest verification: `mvnw.cmd clean verify` passed with 19 tests.
+- [x] Latest verification: `mvnw.cmd clean verify` passed with 26 tests on August 2, 2026.
 - [x] No local JDK, screenshots, videos, project media, API keys, or local config are intended for commit.
 
 ## Must Do Before Hackster Submit
@@ -27,7 +27,7 @@
 - [ ] Add `submission/build-instructions.md` and `submission/usage-instructions.md`.
 - [ ] Add GitHub link: `https://github.com/darcy0408/diskFindR`.
 - [ ] Upload screenshots and demo video.
-- [ ] Submit before the deadline-safe date: August 2, 2026, unless Hackster support confirms August 16, 2026 applies.
+- [ ] Submit before the confirmed Hackster deadline: August 16, 2026 at 11:59 PM Pacific Time.
 
 ## Say Clearly In Submission
 
@@ -36,3 +36,9 @@
 - [ ] Precision Mode, optical flow, and robust mobile upload are experimental/next work.
 - [ ] OpenStreetMap and Open-Meteo data may be incomplete or approximate.
 - [ ] Users must respect private property, water, traffic, cliffs, restricted areas, and course safety.
+- [x] Add model validation guardrails in `submission/model-validation.md`.
+- [x] Add repository license.
+- [x] Add GitHub Actions Java 26 verification workflow.
+- [ ] Capture final screenshots from the running JavaFX app.
+- [ ] Record the 90-120 second demo video.
+- [ ] Optional: collect real field throws for calibration evidence.

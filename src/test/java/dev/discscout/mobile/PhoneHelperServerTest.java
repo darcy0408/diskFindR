@@ -20,10 +20,23 @@ final class PhoneHelperServerTest {
           HttpResponse.BodyHandlers.ofString());
 
       assertEquals(200, response.statusCode());
-      assertTrue(response.body().contains(server.sessionCode()));
-      assertTrue(response.body().contains("/qr.png"));
+      assertTrue(response.body().contains("sessionCodeText"));
+      assertTrue(response.body().contains("/qr.png?code="));
       assertTrue(response.body().contains("Use My Location For Tee"));
       assertTrue(response.body().contains("Send Pasted GPS Coordinates"));
+    }
+  }
+
+  @Test
+  void rejectsHelperPageWithoutSessionCode() throws Exception {
+    try (var server = new PhoneHelperServer(update -> {})) {
+      server.start();
+      var response = HttpClient.newHttpClient().send(
+          HttpRequest.newBuilder(URI.create("http://localhost:%d/".formatted(server.port()))).GET().build(),
+          HttpResponse.BodyHandlers.ofString());
+
+      assertEquals(403, response.statusCode());
+      assertTrue(response.body().contains("session link"));
     }
   }
 
@@ -68,12 +81,24 @@ final class PhoneHelperServerTest {
     try (var server = new PhoneHelperServer(update -> {})) {
       server.start();
       var response = HttpClient.newHttpClient().send(
-          HttpRequest.newBuilder(URI.create("http://localhost:%d/qr.png".formatted(server.port()))).GET().build(),
+          HttpRequest.newBuilder(URI.create("http://localhost:%d/qr.png?code=%s".formatted(server.port(), server.sessionCode()))).GET().build(),
           HttpResponse.BodyHandlers.ofByteArray());
 
       assertEquals(200, response.statusCode());
       assertEquals("image/png", response.headers().firstValue("Content-Type").orElse(""));
       assertTrue(response.body().length > 100);
+    }
+  }
+
+  @Test
+  void rejectsQrCodeWithoutSessionCode() throws Exception {
+    try (var server = new PhoneHelperServer(update -> {})) {
+      server.start();
+      var response = HttpClient.newHttpClient().send(
+          HttpRequest.newBuilder(URI.create("http://localhost:%d/qr.png".formatted(server.port()))).GET().build(),
+          HttpResponse.BodyHandlers.ofString());
+
+      assertEquals(403, response.statusCode());
     }
   }
 }

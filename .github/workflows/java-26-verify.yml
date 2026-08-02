@@ -1,0 +1,29 @@
+name: Java 26 Verify
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 26
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '26'
+          cache: maven
+
+      - name: Show Java version
+        shell: pwsh
+        run: java -version
+
+      - name: Verify
+        shell: pwsh
+        run: .\mvnw.cmd clean verify

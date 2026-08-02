@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -92,6 +93,10 @@ public final class PhoneHelperServer implements AutoCloseable {
       send(exchange, 405, "Method not allowed", "text/plain; charset=utf-8");
       return;
     }
+    if (!requestHasMatchingCode(exchange)) {
+      send(exchange, 403, "Open the phone helper using the current DiscScout session link or QR code.", "text/plain; charset=utf-8");
+      return;
+    }
     exchange.getResponseHeaders().set("Referrer-Policy", "no-referrer");
     exchange.getResponseHeaders().set("Permissions-Policy", "camera=(), microphone=()");
     send(exchange, 200, pageHtml(), "text/html; charset=utf-8");
@@ -100,6 +105,10 @@ public final class PhoneHelperServer implements AutoCloseable {
   private void handleQr(HttpExchange exchange) throws IOException {
     if (!"GET".equals(exchange.getRequestMethod())) {
       send(exchange, 405, "Method not allowed", "text/plain; charset=utf-8");
+      return;
+    }
+    if (!requestHasMatchingCode(exchange)) {
+      send(exchange, 403, "Open the QR code using the current DiscScout session link.", "text/plain; charset=utf-8");
       return;
     }
     try {
@@ -173,8 +182,8 @@ public final class PhoneHelperServer implements AutoCloseable {
             <h1>DiscScout Phone Helper</h1>
             <section class=\"card\">
               <div class=\"muted\">Session code</div>
-              <div class=\"code\">{{SESSION_CODE}}</div>
-              <img class=\"qr\" src=\"/qr.png\" alt=\"QR code for this phone helper page\">
+              <div id=\"sessionCodeText\" class=\"code\">------</div>
+              <img id=\"qr\" class=\"qr\" alt=\"QR code for this phone helper page\">
               <p>This page sends your current phone location to the DiscScout app running on this computer. It does not create an account or upload your location anywhere else.</p>
             </section>
             <section class=\"card\">
@@ -194,8 +203,11 @@ public final class PhoneHelperServer implements AutoCloseable {
             </section>
           </main>
           <script>
-            const sessionCode = '{{SESSION_CODE}}';
+            const params = new URLSearchParams(window.location.search);
+            const sessionCode = params.get('code') || "";
             const status = document.getElementById('status');
+            document.getElementById('sessionCodeText').textContent = sessionCode || 'Missing code';
+            document.getElementById('qr').src = `/qr.png?code=${encodeURIComponent(sessionCode)}`;
             async function sendPayload(payload) {
               const response = await fetch('/api/location', {
                 method: 'POST',
@@ -247,9 +259,31 @@ public final class PhoneHelperServer implements AutoCloseable {
           </script>
         </body>
         </html>
-        """.replace("{{SESSION_CODE}}", sessionCode);
+        """;
   }
 
+  private boolean requestHasMatchingCode(HttpExchange exchange) {
+    return sessionCode.equals(queryParam(exchange, "code"));
+  }
+
+  private static String queryParam(HttpExchange exchange, String name) {
+    var query = exchange.getRequestURI().getRawQuery();
+    if (query == null || query.isBlank()) {
+      return "";
+    }
+    for (var pair : query.split("&")) {
+      var parts = pair.split("=", 2);
+      var key = urlDecode(parts[0]);
+      if (name.equals(key)) {
+        return parts.length == 2 ? urlDecode(parts[1]) : "";
+      }
+    }
+    return "";
+  }
+
+  private static String urlDecode(String value) {
+    return URLDecoder.decode(value, StandardCharsets.UTF_8);
+  }
   private static void send(HttpExchange exchange, int status, String body, String contentType) throws IOException {
     var bytes = body.getBytes(StandardCharsets.UTF_8);
     exchange.getResponseHeaders().set("Content-Type", contentType);

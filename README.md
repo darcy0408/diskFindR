@@ -61,7 +61,7 @@ After importing a video, the Mark Disc step shows the video with a click overlay
 
 ## Phone Helper
 
-The Setup step can start a local phone helper page with a six-digit session code and locally generated QR code. The page asks the browser for location only after the user taps **Use My Location For Tee**, then sends the coordinate back to the desktop app to fill the release point.
+The Setup step can start a local phone helper page with a six-digit session code and locally generated QR code. The helper page and QR endpoint require the active session code in the URL. The page asks the browser for location only after the user taps **Use My Location For Tee**, then sends the coordinate back to the desktop app to fill the release point.
 
 The helper runs locally and does not create an account. Exact coordinates are not written to the diagnostic log. If browser geolocation is blocked, the helper page also accepts pasted latitude/longitude from a phone map app. Many mobile browsers require HTTPS for geolocation on local-network URLs, so the manual GPS fallback remains available.
 ## Public Course Lookup
@@ -71,7 +71,7 @@ The Setup step can search public OpenStreetMap data near the current release coo
 OSM data may be incomplete or slightly wrong, so every filled value remains editable. The desktop app does not store device location; future phone-helper geolocation should request explicit browser permission and use the result only to suggest nearby courses.
 ## Simple and Advanced Estimate
 
-The Estimate step defaults to Simple Mode with disc type, disc weight, throw style, handedness, and throw direction. Open **Advanced model details** to edit release coordinates, release speed, launch angle, and hyzer/anhyzer angle.
+The Estimate step defaults to Simple Mode with disc type, disc weight, throw style, handedness, and throw direction. Open **Advanced model details** to edit release coordinates, release speed, launch angle, hyzer/anhyzer angle, and release height.
 ## Wind and Disc Details
 
 On the Wind step, DiscScout automatically uses the current release latitude and longitude to query Open-Meteo. Raw wind speed, direction, and gust fields are hidden in **Advanced wind override** because most players will not know those values. If weather is unavailable, the app can continue with a wider search zone.
