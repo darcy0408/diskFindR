@@ -18,3 +18,9 @@ The first model is deterministic and simplified. Aerodynamic behavior is isolate
 ## 2026-08-01: OpenStreetMap Tee Data
 
 DiscScout should use OpenStreetMap/Overpass as the public course and tee-coordinate source. OSM has established tags for `leisure=disc_golf_course`, `disc_golf=tee`, `disc_golf=basket`, and `disc_golf=hole`. The app should cache only public map features and should use device/browser location only after explicit user permission.
+
+## 2026-08-01: Review-Driven Physics Calibration
+
+A six-hats review found the original lift model was too ballistic and under-predicted realistic throws. The MVP model is now calibrated to plausibility guardrails rather than laboratory aerodynamics: a generic distance driver at 26 m/s and 12 degrees should land in the 95-125 m range with 3.5-6.5 s hang time; putter and distance-driver profiles must differ materially; strong wind must move the landing point materially. These are regression targets until field-thrown calibration data replaces them.
+
+The Monte Carlo search anchor is now an actual simulated landing sample closest to the cloud center, avoiding an independent east/north median that could fall away from the simulated landing cloud.

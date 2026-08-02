@@ -105,6 +105,7 @@ public final class DiscScoutApplication extends Application {
   private Slider speed;
   private Slider launch;
   private Slider hyzer;
+  private Slider releaseHeight;
   private TextField windSpeed;
   private TextField windDirection;
   private TextField windGust;
@@ -505,6 +506,7 @@ public final class DiscScoutApplication extends Application {
     addRow(advancedGrid, r++, "Release speed m/s", labeledSlider(speed));
     addRow(advancedGrid, r++, "Launch angle degrees", labeledSlider(launch));
     addRow(advancedGrid, r++, "Hyzer/anhyzer degrees", labeledSlider(hyzer));
+    addRow(advancedGrid, r++, "Release height meters", labeledSlider(releaseHeight));
     var advanced = new TitledPane("Advanced model details", advancedGrid);
     advanced.getStyleClass().add("advanced-pane");
     advanced.setExpanded(false);
@@ -562,6 +564,7 @@ public final class DiscScoutApplication extends Application {
     speed = slider(4, 35, 22);
     launch = slider(-5, 30, 8);
     hyzer = slider(-25, 25, 0);
+    releaseHeight = slider(0.4, 2.5, 1.4);
     nearbyCourses = new ComboBox<>();
     nearbyCourses.setPromptText("Find courses first");
     nearbyCourses.setPrefWidth(360);
@@ -643,6 +646,7 @@ public final class DiscScoutApplication extends Application {
         speed.getValue(),
         launch.getValue(),
         hyzer.getValue(),
+        releaseHeight.getValue(),
         selectedDiscProfile(),
         throwType.getSelectionModel().getSelectedItem(),
         handedness.getSelectionModel().getSelectedItem(),

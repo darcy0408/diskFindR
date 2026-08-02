@@ -62,6 +62,7 @@ public final class MonteCarloSimulator {
         Math.max(4.0, input.releaseSpeedMps() + random.nextGaussian() * u.speedStdDevMps()),
         input.launchAngleDegrees() + random.nextGaussian() * u.launchStdDevDegrees(),
         input.hyzerAngleDegrees() + random.nextGaussian() * u.hyzerStdDevDegrees(),
+        Math.max(0.2, input.releaseHeightMeters() + random.nextGaussian() * 0.15),
         perturbedDisc,
         input.throwType(),
         input.handedness(),
@@ -72,12 +73,10 @@ public final class MonteCarloSimulator {
   private SimulationOutcome.Success summarize(GeoPoint origin, int requested, long seed, List<LandingSample> samples) {
     var east = samples.stream().mapToDouble(s -> s.localPoint().eastMeters()).average().orElse(0.0);
     var north = samples.stream().mapToDouble(s -> s.localPoint().northMeters()).average().orElse(0.0);
-    var sortedEast = samples.stream().sorted(Comparator.comparingDouble(s -> s.localPoint().eastMeters())).toList();
-    var sortedNorth = samples.stream().sorted(Comparator.comparingDouble(s -> s.localPoint().northMeters())).toList();
-    var median = GeoCalculator.fromLocal(origin, new dev.discscout.domain.LocalPoint(
-        sortedEast.get(sortedEast.size() / 2).localPoint().eastMeters(),
-        sortedNorth.get(sortedNorth.size() / 2).localPoint().northMeters(),
-        0.0));
+    var anchorSample = samples.stream()
+        .min(Comparator.comparingDouble(s -> Math.hypot(s.localPoint().eastMeters() - east, s.localPoint().northMeters() - north)))
+        .orElse(samples.getFirst());
+    var median = anchorSample.geoPoint();
     var mean = GeoCalculator.fromLocal(origin, new dev.discscout.domain.LocalPoint(east, north, 0.0));
 
     var cxx = 0.0;

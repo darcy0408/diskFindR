@@ -34,6 +34,18 @@ final class MonteCarloSimulatorTest {
     assertTrue(westWind.meanCoordinate().longitude() > calm.meanCoordinate().longitude());
   }
 
+
+  @Test
+  void medianSearchAnchorIsASimulatedLandingSample() {
+    var sim = simulator();
+    var outcome = assertInstanceOf(SimulationOutcome.Success.class, sim.run(input(0), 140, 55L));
+
+    var anchorIsSample = outcome.samples().stream().anyMatch(sample ->
+        sample.geoPoint().latitude() == outcome.medianCoordinate().latitude()
+            && sample.geoPoint().longitude() == outcome.medianCoordinate().longitude());
+
+    assertTrue(anchorIsSample, "median search anchor should be an actual simulated landing point");
+  }
   @Test
   void probabilityEllipseGrowsWithUncertainty() {
     var low = MonteCarloSimulator.ellipse(0, 0, 25, 0, 16, 0.50);
@@ -52,6 +64,7 @@ final class MonteCarloSimulatorTest {
         22.0,
         8.0,
         0.0,
+        1.4,
         DiscProfile.builtIns().get(2),
         ThrowType.BACKHAND,
         Handedness.RIGHT,
@@ -59,4 +72,3 @@ final class MonteCarloSimulatorTest {
         MeasurementUncertainty.soloDefault());
   }
 }
-

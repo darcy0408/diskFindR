@@ -25,10 +25,10 @@ public final class FlightSimulator {
     var up = Math.max(-2.0, input.releaseSpeedMps() * Math.sin(launch));
     var x = 0.0;
     var y = 0.0;
-    var z = Math.max(0.2, 1.4);
+    var z = Math.max(0.2, input.releaseHeightMeters());
     var points = new ArrayList<TrajectoryPoint>();
     var handednessSign = input.handedness() == Handedness.RIGHT ? 1 : -1;
-    var windCarryFactor = 0.25 * SimplifiedAerodynamicModel.massSensitivity(input.disc());
+    var windCarryFactor = 0.55 * SimplifiedAerodynamicModel.massSensitivity(input.disc());
     var previous = new LocalPoint(x, y, z);
 
     for (var t = 0.0; t <= MAX_TIME_SECONDS; t += DT) {
@@ -41,7 +41,7 @@ public final class FlightSimulator {
       }
 
       points.add(new TrajectoryPoint(t, new LocalPoint(x, y, z), speed));
-      var drag = model.dragCoefficient(input.disc(), speed);
+      var drag = model.dragDecayPerSecond(input.disc(), speed);
       east -= drag * relativeEast * DT;
       north -= drag * relativeNorth * DT;
       up += (model.liftAcceleration(input.disc(), horizontalSpeed, input.launchAngleDegrees()) - GRAVITY - drag * up) * DT;

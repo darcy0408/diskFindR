@@ -6,10 +6,10 @@ public record ThrowInput(
     double releaseSpeedMps,
     double launchAngleDegrees,
     double hyzerAngleDegrees,
+    double releaseHeightMeters,
     DiscProfile disc,
     ThrowType throwType,
     Handedness handedness,
     Wind wind,
     MeasurementUncertainty uncertainty) {
 }
-

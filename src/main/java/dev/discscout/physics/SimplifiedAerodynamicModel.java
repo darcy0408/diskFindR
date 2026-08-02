@@ -4,16 +4,21 @@ import dev.discscout.domain.DiscProfile;
 
 public final class SimplifiedAerodynamicModel implements AerodynamicModel {
   @Override
-  public double dragCoefficient(DiscProfile disc, double speedMps) {
+  public double dragDecayPerSecond(DiscProfile disc, double speedMps) {
     var massFactor = massSensitivity(disc);
-    return (0.010 + disc.speed() * 0.0007 + Math.max(0.0, speedMps - 20.0) * 0.00025) * massFactor;
+    var driverEfficiency = Math.max(0.72, 1.45 - disc.speed() * 0.060);
+    return (0.035 + Math.max(0.0, speedMps - 18.0) * 0.0012) * massFactor * driverEfficiency;
   }
 
   @Override
   public double liftAcceleration(DiscProfile disc, double speedMps, double launchAngleDegrees) {
-    var glideLift = disc.glide() * 0.08;
-    var angleLift = Math.cos(Math.toRadians(Math.max(-20.0, Math.min(35.0, launchAngleDegrees)))) * 0.18;
-    return Math.min(6.0, (glideLift + angleLift) * speedMps / 3.0 * massSensitivity(disc));
+    var clampedSpeed = Math.max(0.0, Math.min(32.0, speedMps));
+    var cruise = Math.pow(clampedSpeed / 24.0, 1.35);
+    var glideFactor = 0.72 + disc.glide() * 0.075;
+    var speedClassFactor = 0.70 + disc.speed() * 0.025;
+    var noseAngleFactor = 0.92 + Math.cos(Math.toRadians(Math.max(-20.0, Math.min(35.0, launchAngleDegrees)))) * 0.10;
+    var massFactor = massSensitivity(disc);
+    return Math.min(7.45 * massFactor, 6.85 * cruise * glideFactor * speedClassFactor * noseAngleFactor * massFactor);
   }
 
   @Override
@@ -29,4 +34,3 @@ public final class SimplifiedAerodynamicModel implements AerodynamicModel {
     return Math.max(0.85, Math.min(1.18, 173.0 / disc.massGrams()));
   }
 }
-

@@ -7,7 +7,7 @@ Last updated: 2026-08-01
 - Repository initialized and scaffolded as a Java 26 Maven/JavaFX application.
 - Portable Oracle JDK 26.0.2 is available under ignored `.jdk/` for local verification.
 - JavaFX 26.0.1, JavaCV/Bytedeco 1.5.13, Jackson 2.20.1, JUnit 6.0.0, Maven Surefire 3.5.5, Compiler Plugin 3.15.0, and JaCoCo 0.8.15 are pinned.
-- Solo Mode vertical slice is implemented with a six-step guided flow, manual tracking table, JavaCV video metadata, release-coordinate Open-Meteo/manual wind, disc weight classes, deterministic physics, seeded Monte Carlo, probability ellipses, WebView map overlay, configurable route preview, persistence, and exports.
+- Solo Mode vertical slice is implemented with a six-step guided flow, manual tracking table, JavaCV video metadata, release-coordinate Open-Meteo/manual wind, disc weight classes, review-calibrated deterministic physics, seeded Monte Carlo, probability ellipses, WebView map overlay, configurable route preview, persistence, and exports.
 
 ## Completed
 
@@ -38,7 +38,9 @@ Last updated: 2026-08-01
 - Search-route control pass: Search now lets users choose Walk grid or Search spiral and select vegetation spacing before export.
 - Confidence legend pass: Search now explains the 50, 80, and 95 percent regions next to the result summary.
 - Map fallback pass: WebView map now shows an intentional field-sketch background and tile-status message when raster tiles fail, while overlays remain visible.
+- Physics calibration pass: lift/drag tuning now produces plausible distance-driver distance and hang-time guardrails, material disc and wind effects, release-height input, and a spatial Monte Carlo anchor from an actual simulated landing sample.
 - After map-fallback pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 19 tests run, 0 failures, 0 errors, 0 skipped.
+- After physics calibration pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 24 tests run, 0 failures, 0 errors, 0 skipped.
 - After confidence-legend pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 19 tests run, 0 failures, 0 errors, 0 skipped.
 - After search-route control pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 19 tests run, 0 failures, 0 errors, 0 skipped.
 - After phone-helper polish pass, `.\mvnw.cmd test`: succeeded. Test result: 11 tests run, 0 failures, 0 errors, 0 skipped.

@@ -76,7 +76,7 @@ The Estimate step defaults to Simple Mode with disc type, disc weight, throw sty
 
 On the Wind step, DiscScout automatically uses the current release latitude and longitude to query Open-Meteo. Raw wind speed, direction, and gust fields are hidden in **Advanced wind override** because most players will not know those values. If weather is unavailable, the app can continue with a wider search zone.
 
-On the Estimate step, disc type and disc weight class both feed the simulation. Lighter discs are modeled as slightly more wind-sensitive; heavier discs are modeled as slightly less wind-sensitive. These are approximate inputs, not full aerodynamic measurements.
+On the Estimate step, disc type, disc weight class, and release height all feed the simulation. Lighter discs are modeled as slightly more wind-sensitive; heavier discs are modeled as slightly less wind-sensitive. The simplified lift/drag model is calibrated with plausibility regression tests, but these are approximate inputs, not full aerodynamic measurements or a substitute for field validation.
 ## Safety
 
 The predicted area is an estimate, not a guarantee. Do not enter roads, water, cliffs, private property, restricted areas, or unsafe terrain. DiscScout is not a navigation or emergency-location system.
