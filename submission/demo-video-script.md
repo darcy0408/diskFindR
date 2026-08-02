@@ -1,12 +1,13 @@
 # 90-120 Second Demo Video Script
 
-1. Show a player searching brush: lost discs waste time and money.
-2. Show one phone behind the tee, landscape, 60 FPS.
-3. Launch DiscScout with Java 26 proof visible.
-4. Open the sample project or import a throw video.
-5. Mark release frame and visible disc points.
-6. Enter wind or use Open-Meteo with manual correction.
-7. Run 500 Monte Carlo trajectories.
-8. Show 50, 80, and 95 percent zones on the map.
-9. Switch to Precision Mode preview and explain how a side phone can narrow the area when calibration is valid.
-10. Export the search route and printable warning summary.
+1. Lost-disc problem: discs disappear into brush, trees, glare, or distance.
+2. One-phone setup: normal phone camera behind the tee, no special hardware.
+3. Java proof: show `java -version` or `submission/build-proof-java26.txt` with Java 26.
+4. Launch DiscScout and choose **Open Sample Project**.
+5. Show Sample Mode banner and Mark Disc with synthetic marks/trail.
+6. Show Wind step: DiscScout fetches model wind automatically; no user wind-speed typing.
+7. Show Estimate step: simple disc/throw controls, advanced model details collapsed.
+8. Choose **Estimate Landing Zone** and show Monte Carlo result.
+9. Show Search map: probability zones, route preview, safety warning, and export button.
+10. Show BYOD bonus: phone helper with session code, QR code, browser location, and pasted GPS fallback.
+11. End on GitHub repo and build/test proof.

@@ -223,3 +223,12 @@
   -fx-stroke-width: 2px;
   -fx-opacity: 0.75;
 }
+.sample-banner {
+  -fx-background-color: #183326;
+  -fx-text-fill: #f7f8f2;
+  -fx-font-weight: 800;
+  -fx-padding: 10px 16px;
+  -fx-wrap-text: true;
+  -fx-border-color: #d6b55f;
+  -fx-border-width: 1px 0 1px 0;
+}

@@ -86,6 +86,7 @@ public final class DiscScoutApplication extends Application {
   private SearchRoute lastRoute;
 
   private TextArea status;
+  private Label sampleBanner;
   private ListView<String> stepList;
   private StackPane stepContent;
   private Label resultSummary;
@@ -94,6 +95,7 @@ public final class DiscScoutApplication extends Application {
   private Label courseSummary;
   private Label phoneHelperSummary;
   private boolean attemptedWindFetch;
+  private boolean sampleMode;
   private PhoneHelperServer phoneHelperServer;
   private WebEngine mapEngine;
   private TextField latitude;
@@ -122,7 +124,11 @@ public final class DiscScoutApplication extends Application {
     startupContext = new StartupLoader().load();
     initializeInputs();
     var root = new BorderPane();
-    root.setTop(header());
+    sampleBanner = new Label();
+    sampleBanner.getStyleClass().add("sample-banner");
+    sampleBanner.setVisible(false);
+    sampleBanner.setManaged(false);
+    root.setTop(new VBox(header(), sampleBanner));
     root.setCenter(stepper(stage));
     status = new TextArea("What happened\nReady. Open the sample project for the fastest walkthrough, or start at Setup for your own throw.\n" + startupContext.config().message() + "\nJava runtime: " + startupContext.javaVersion());
     status.setEditable(false);
@@ -170,6 +176,7 @@ public final class DiscScoutApplication extends Application {
     };
     stepList.getSelectionModel().selectedIndexProperty().addListener((obs, old, index) -> {
       stepContent.getChildren().setAll(panes[index.intValue()]);
+      updateSampleBanner(index.intValue());
       if (index.intValue() == 3 && !attemptedWindFetch) fetchWindForCurrentTee();
       if (index.intValue() == 5) refreshMap();
     });
@@ -179,6 +186,25 @@ public final class DiscScoutApplication extends Application {
     return shell;
   }
 
+
+  private void updateSampleBanner(int stepIndex) {
+    if (sampleBanner == null) return;
+    if (!sampleMode) {
+      sampleBanner.setVisible(false);
+      sampleBanner.setManaged(false);
+      return;
+    }
+    sampleBanner.setVisible(true);
+    sampleBanner.setManaged(true);
+    var message = switch (stepIndex) {
+      case 2 -> "Sample Mode: synthetic tracking marks are loaded. Show the yellow marks and table, then continue to Wind.";
+      case 3 -> "Sample Mode: wind is fetched automatically from the sample tee. This demonstrates that users do not type wind speed.";
+      case 4 -> "Sample Mode: choose Estimate Landing Zone. Simple controls are visible; advanced model values are available but collapsed.";
+      case 5 -> "Sample Mode: this is the judge-facing result: probability regions, route preview, exports, and safety language.";
+      default -> "Sample Mode: synthetic non-personal data is loaded for a fast judge walkthrough.";
+    };
+    sampleBanner.setText(message);
+  }
   private void showStep(int index) {
     if (stepList != null) {
       stepList.getSelectionModel().select(Math.max(0, Math.min(STEPS.length - 1, index)));
@@ -186,18 +212,20 @@ public final class DiscScoutApplication extends Application {
   }
 
   private Node recordPane() {
-    var sample = actionCard("Open Sample Project", "Instant guided demo", "Runs 500 trajectories and jumps to the search map.");
+    var sample = actionCard("Open Sample Project", "Guided judge demo", "Loads synthetic marks first, then walks through wind, estimate, and search.");
     sample.getStyleClass().add("primary-card");
     sample.setOnAction(e -> {
       project = sampleProject();
+      sampleMode = true;
       fillInputsFromProject();
-      log("Sample walkthrough: loaded synthetic throw data, ran the simulation, and opened Search.");
-      runSimulation(false);
-      showStep(5);
+      log("Sample walkthrough loaded. Start on Mark Disc: synthetic marks are already present so the demo can move quickly.");
+      showStep(2);
     });
 
     var solo = actionCard("Start Solo Search", "One phone is enough", "Record with the normal camera app, then mark what you can see.");
     solo.setOnAction(e -> {
+      sampleMode = false;
+      updateSampleBanner(1);
       log("Solo Search started. Record landscape video from 12-18 feet behind the tee, then import it on the Video step.");
       showStep(1);
     });
@@ -493,7 +521,7 @@ public final class DiscScoutApplication extends Application {
   }
 
   private Node searchPane() {
-    resultSummary = new Label("Simulation not run yet. Open the sample project or run 500 trajectories to draw the search zone.");
+    resultSummary = new Label("Estimate not run yet. Open the sample project or choose Estimate Landing Zone to draw the search area.");
     resultSummary.getStyleClass().add("result-summary");
     var map = new WebView();
     mapEngine = map.getEngine();
@@ -672,8 +700,8 @@ public final class DiscScoutApplication extends Application {
 
   private void updateSummary(SimulationOutcome.Success success, SearchRoute route) {
     if (resultSummary == null) return;
-    resultSummary.setText("Search this zone first: median anchor %.5f, %.5f. 80%% route: %s with %d waypoints. Confidence: %s. This is an estimate, not a guaranteed landing point."
-        .formatted(success.medianCoordinate().latitude(), success.medianCoordinate().longitude(), route.name(), route.waypoints().size(), success.confidenceLabel()));
+    resultSummary.setText("Search this zone first: follow the %s route through the 80%% probability area. Confidence: %s. Median anchor: %.5f, %.5f. This is an estimate, not a guaranteed landing point."
+        .formatted(route.name(), success.confidenceLabel(), success.medianCoordinate().latitude(), success.medianCoordinate().longitude()));
   }
 
   private void export() {

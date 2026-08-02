@@ -33,7 +33,7 @@ or:
 
 ## Guided Demo Flow
 
-The main screen is organized as **Record -> Import -> Mark -> Wind -> Simulate -> Search**. For the fastest walkthrough, choose **Open Sample Project**; DiscScout loads synthetic data, runs the seeded simulation, and opens the Search screen with probability regions and a route preview.
+The main screen is organized as **Setup -> Video -> Mark Disc -> Wind -> Estimate -> Search**. For the fastest walkthrough, choose **Open Sample Project**; DiscScout loads synthetic non-personal data, opens Mark Disc with sample observations, and shows a Sample Mode banner that guides the judge through Wind, Estimate, and Search.
 
 The map uses OpenStreetMap tiles by default and keeps overlays working even when aerial credentials are missing or tiles fail to load.
 ## Aerial Map Key

@@ -1,10 +1,12 @@
 # Usage Instructions
 
-1. Run `./run.ps1`.
-2. Choose Solo Mode.
-3. Import a video or open the sample project.
-4. Enter release latitude, longitude, bearing, disc profile, throw type, handedness, and wind.
-5. Add manual tracking points when automatic tracking is unreliable.
-6. Run 500 trajectories.
-7. Interpret the 50, 80, and 95 percent search regions.
+1. Run `./run.ps1` from the repository root.
+2. For the fastest demo, choose **Open Sample Project**.
+3. Review the Sample Mode banner on **Mark Disc** and inspect the synthetic tracking marks.
+4. Continue to **Wind**; DiscScout fetches nearby model wind from the release coordinate automatically.
+5. Continue to **Estimate**; use the simple disc/throw controls or open Advanced model details if needed.
+6. Choose **Estimate Landing Zone**.
+7. Interpret the 50, 80, and 95 percent search regions and route preview on the Search map.
 8. Export GeoJSON, CSV, and printable summary.
+
+For a real throw, start Solo Search, import a phone video, pause visible frames, and click the disc to create tracking marks.
