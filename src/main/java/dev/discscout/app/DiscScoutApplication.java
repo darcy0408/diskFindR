@@ -90,6 +90,7 @@ public final class DiscScoutApplication extends Application {
   private ListView<String> stepList;
   private StackPane stepContent;
   private Label resultSummary;
+  private Label confidenceLegend;
   private Label videoEmpty;
   private Label windSummary;
   private Label courseSummary;
@@ -525,6 +526,10 @@ public final class DiscScoutApplication extends Application {
   private Node searchPane() {
     resultSummary = new Label("Estimate not run yet. Open the sample project or choose Estimate Landing Zone to draw the search area.");
     resultSummary.getStyleClass().add("result-summary");
+    confidenceLegend = new Label(defaultConfidenceLegend("Not run yet"));
+    confidenceLegend.getStyleClass().add("confidence-legend");
+    var summaryRow = new HBox(10, resultSummary, confidenceLegend);
+    HBox.setHgrow(resultSummary, Priority.ALWAYS);
     var map = new WebView();
     mapEngine = map.getEngine();
     mapEngine.load(getClass().getResource("/dev/discscout/mapping/map.html").toExternalForm());
@@ -541,7 +546,7 @@ public final class DiscScoutApplication extends Application {
     tools.getStyleClass().add("command-row");
     var box = new VBox(10,
         missionCard("Step 6 of 6", "Search the most likely area first.", "Start with the 80 percent route, but respect hazards and private property.", "Use the route on the map or export a search plan."),
-        resultSummary,
+        summaryRow,
         routeControls,
         tools,
         map);
@@ -739,6 +744,13 @@ public final class DiscScoutApplication extends Application {
     if (resultSummary == null) return;
     resultSummary.setText("Search this zone first: follow the %s route through the 80%% probability area with %.1f m spacing. Confidence: %s. Median anchor: %.5f, %.5f. This is an estimate, not a guaranteed landing point."
         .formatted(route.name(), route.spacingMeters(), success.confidenceLabel(), success.medianCoordinate().latitude(), success.medianCoordinate().longitude()));
+    if (confidenceLegend != null) {
+      confidenceLegend.setText(defaultConfidenceLegend(success.confidenceLabel()));
+    }
+  }
+
+  private String defaultConfidenceLegend(String confidence) {
+    return "Confidence legend\n50%: tightest likely zone\n80%: search this first\n95%: wider backup zone\nCurrent: " + confidence;
   }
 
   private void export() {

@@ -141,6 +141,18 @@
   -fx-text-fill: #1b3425;
   -fx-wrap-text: true;
 }
+.confidence-legend {
+  -fx-background-color: #eef4ea;
+  -fx-border-color: #b9cdb8;
+  -fx-border-radius: 8px;
+  -fx-background-radius: 8px;
+  -fx-padding: 12px;
+  -fx-font-size: 13px;
+  -fx-font-weight: 700;
+  -fx-text-fill: #24382b;
+  -fx-wrap-text: true;
+  -fx-min-width: 210px;
+}
 .mission-card {
   -fx-background-color: #fff7df;
   -fx-border-color: #d6b55f;
