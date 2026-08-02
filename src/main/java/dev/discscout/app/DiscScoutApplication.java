@@ -109,6 +109,8 @@ public final class DiscScoutApplication extends Application {
   private TextField windGust;
   private ComboBox<DiscGolfCourse> nearbyCourses;
   private ComboBox<DiscGolfTee> nearbyTees;
+  private ComboBox<String> routeStrategy;
+  private ComboBox<SearchRouteGenerator.Vegetation> vegetation;
   private ComboBox<DiscProfile> disc;
   private ComboBox<DiscWeightClass> discWeight;
   private ComboBox<ThrowType> throwType;
@@ -531,6 +533,8 @@ public final class DiscScoutApplication extends Application {
     var export = new Button("Export Search Plan");
     export.getStyleClass().add("primary-button");
     export.setOnAction(e -> export());
+    var routeControls = new HBox(8, new Label("Route"), routeStrategy, new Label("Terrain"), vegetation);
+    routeControls.getStyleClass().add("command-row");
     var dark = new CheckBox("Dark map");
     dark.setOnAction(e -> mapEngine.executeScript("document.body.classList.toggle('dark', " + dark.isSelected() + ")"));
     var tools = new HBox(8, run, export, dark);
@@ -538,6 +542,7 @@ public final class DiscScoutApplication extends Application {
     var box = new VBox(10,
         missionCard("Step 6 of 6", "Search the most likely area first.", "Start with the 80 percent route, but respect hazards and private property.", "Use the route on the map or export a search plan."),
         resultSummary,
+        routeControls,
         tools,
         map);
     box.setPadding(new Insets(14));
@@ -562,6 +567,12 @@ public final class DiscScoutApplication extends Application {
     windSpeed = field("2.5");
     windDirection = field("270");
     windGust = field("4.0");
+    routeStrategy = new ComboBox<>(FXCollections.observableArrayList("Walk grid", "Search spiral"));
+    routeStrategy.getSelectionModel().selectFirst();
+    routeStrategy.setOnAction(e -> updateSearchRouteFromControls());
+    vegetation = new ComboBox<>(FXCollections.observableArrayList(SearchRouteGenerator.Vegetation.values()));
+    vegetation.getSelectionModel().select(SearchRouteGenerator.Vegetation.LIGHT_BRUSH);
+    vegetation.setOnAction(e -> updateSearchRouteFromControls());
     disc = new ComboBox<>(FXCollections.observableArrayList(DiscProfile.builtIns()));
     disc.getSelectionModel().select(2);
     discWeight = new ComboBox<>(FXCollections.observableArrayList(DiscWeightClass.values()));
@@ -579,7 +590,7 @@ public final class DiscScoutApplication extends Application {
       var outcome = simulator.run(input, 500, project.simulationSeed);
       if (outcome instanceof SimulationOutcome.Success success) {
         lastOutcome = success;
-        lastRoute = routeGenerator.lawnMower(input.releasePoint(), success.probability80(), SearchRouteGenerator.Vegetation.LIGHT_BRUSH.spacingMeters());
+        lastRoute = buildSearchRoute(input.releasePoint(), success.probability80());
         updateSummary(success, lastRoute);
         log("Generated %d valid trajectories. Median search anchor: %.6f, %.6f. Confidence: %s."
             .formatted(success.validTrajectories(), success.medianCoordinate().latitude(), success.medianCoordinate().longitude(), success.confidenceLabel()));
@@ -594,6 +605,32 @@ public final class DiscScoutApplication extends Application {
     }
   }
 
+
+  private SearchRoute buildSearchRoute(GeoPoint origin, dev.discscout.simulation.ProbabilityEllipse ellipse) {
+    var selectedVegetation = vegetation == null || vegetation.getSelectionModel().getSelectedItem() == null
+        ? SearchRouteGenerator.Vegetation.LIGHT_BRUSH
+        : vegetation.getSelectionModel().getSelectedItem();
+    var selectedRoute = routeStrategy == null || routeStrategy.getSelectionModel().getSelectedItem() == null
+        ? "Walk grid"
+        : routeStrategy.getSelectionModel().getSelectedItem();
+    if ("Search spiral".equals(selectedRoute)) {
+      return routeGenerator.spiral(origin, ellipse, selectedVegetation.spacingMeters());
+    }
+    return routeGenerator.lawnMower(origin, ellipse, selectedVegetation.spacingMeters());
+  }
+
+  private void updateSearchRouteFromControls() {
+    if (lastOutcome == null) return;
+    try {
+      var input = input();
+      lastRoute = buildSearchRoute(input.releasePoint(), lastOutcome.probability80());
+      updateSummary(lastOutcome, lastRoute);
+      refreshMap();
+      log("Search route updated: " + lastRoute.name() + " with %.1f m spacing.".formatted(lastRoute.spacingMeters()));
+    } catch (RuntimeException ex) {
+      log("Could not update search route: " + ex.getMessage());
+    }
+  }
   private ThrowInput input() {
     return new ThrowInput(
         new GeoPoint(Double.parseDouble(latitude.getText()), Double.parseDouble(longitude.getText())),
@@ -700,8 +737,8 @@ public final class DiscScoutApplication extends Application {
 
   private void updateSummary(SimulationOutcome.Success success, SearchRoute route) {
     if (resultSummary == null) return;
-    resultSummary.setText("Search this zone first: follow the %s route through the 80%% probability area. Confidence: %s. Median anchor: %.5f, %.5f. This is an estimate, not a guaranteed landing point."
-        .formatted(route.name(), success.confidenceLabel(), success.medianCoordinate().latitude(), success.medianCoordinate().longitude()));
+    resultSummary.setText("Search this zone first: follow the %s route through the 80%% probability area with %.1f m spacing. Confidence: %s. Median anchor: %.5f, %.5f. This is an estimate, not a guaranteed landing point."
+        .formatted(route.name(), route.spacingMeters(), success.confidenceLabel(), success.medianCoordinate().latitude(), success.medianCoordinate().longitude()));
   }
 
   private void export() {

@@ -8,6 +8,6 @@
 6. Show Wind step: DiscScout fetches model wind automatically; no user wind-speed typing.
 7. Show Estimate step: simple disc/throw controls, advanced model details collapsed.
 8. Choose **Estimate Landing Zone** and show Monte Carlo result.
-9. Show Search map: probability zones, route preview, safety warning, and export button.
+9. Show Search map: probability zones, Walk grid/Search spiral controls, vegetation spacing, safety warning, and export button.
 10. Show BYOD bonus: phone helper with session code, QR code, browser location, and pasted GPS fallback.
 11. End on GitHub repo and build/test proof.

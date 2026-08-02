@@ -17,6 +17,16 @@ public final class SearchRouteGenerator {
     private final double spacingMeters;
     Vegetation(double spacingMeters) { this.spacingMeters = spacingMeters; }
     public double spacingMeters() { return spacingMeters; }
+
+    @Override
+    public String toString() {
+      return switch (this) {
+        case OPEN_GRASS -> "Open grass";
+        case LIGHT_BRUSH -> "Light brush";
+        case HEAVY_BRUSH -> "Heavy brush";
+        case WOODED -> "Wooded";
+      };
+    }
   }
 
   public SearchRoute spiral(GeoPoint origin, ProbabilityEllipse ellipse, double spacingMeters) {

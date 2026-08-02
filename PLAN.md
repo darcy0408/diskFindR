@@ -1,13 +1,13 @@
 # DiscScout Plan
 
-Last updated: 2026-07-31
+Last updated: 2026-08-01
 
 ## Current Status
 
 - Repository initialized and scaffolded as a Java 26 Maven/JavaFX application.
 - Portable Oracle JDK 26.0.2 is available under ignored `.jdk/` for local verification.
 - JavaFX 26.0.1, JavaCV/Bytedeco 1.5.13, Jackson 2.20.1, JUnit 6.0.0, Maven Surefire 3.5.5, Compiler Plugin 3.15.0, and JaCoCo 0.8.15 are pinned.
-- Solo Mode vertical slice is implemented with a six-step guided flow, manual tracking table, JavaCV video metadata, release-coordinate Open-Meteo/manual wind, disc weight classes, deterministic physics, seeded Monte Carlo, probability ellipses, WebView map overlay, route preview, persistence, and exports.
+- Solo Mode vertical slice is implemented with a six-step guided flow, manual tracking table, JavaCV video metadata, release-coordinate Open-Meteo/manual wind, disc weight classes, deterministic physics, seeded Monte Carlo, probability ellipses, WebView map overlay, configurable route preview, persistence, and exports.
 
 ## Completed
 
@@ -15,7 +15,7 @@ Last updated: 2026-07-31
 - Implemented domain records and sealed hierarchies.
 - Implemented geodesy, wind conversion, simplified flight physics, Monte Carlo uncertainty, covariance ellipses, search-route generation, triangulation math, weather client, map provider abstraction, exports, and project persistence.
 - Implemented JavaFX welcome, Solo Mode inputs, video tracking workspace, results map, recording instructions, privacy/limitations, and sample project behavior.
-- Reworked the interface into a six-step guided workflow: Record, Import, Mark, Wind, Simulate, Search. The sample project now auto-runs the demo simulation, the results screen leads with a plain-language "Search this zone first" summary, and map overlays include probability ellipses plus route preview lines.
+- Reworked the interface into a six-step guided workflow: Setup, Video, Mark Disc, Wind, Estimate, Search. The sample project now guides the demo through synthetic marks, wind, estimate, and search; the results screen leads with a plain-language "Search this zone first" summary, and map overlays include probability ellipses plus configurable route preview lines.
 - Added docs, calibration placeholder, sample project JSON, and `submission/` deliverables.
 - Fixed Maven Wrapper exit-code propagation.
 
@@ -34,7 +34,10 @@ Last updated: 2026-07-31
 - Click-to-mark pass: Mark Disc now displays the imported video, accepts click marks, draws marker/trail overlays, supports undo/delete, and adjusts simulation uncertainty from mark count.
 - Phone helper location pass: added local HTTP helper with six-digit session code, browser geolocation request, session-checked location callback, tests, and Setup controls. HTTPS requirements may block geolocation on some phone LAN browsers.
 - Phone helper polish pass: added local ZXing QR-code generation and manual pasted-GPS fallback on the helper page.
-- Test result: 11 tests run, 0 failures, 0 errors, 0 skipped.
+- Sample walkthrough polish pass: Open Sample Project now starts on Mark Disc with a persistent Sample Mode banner instead of skipping directly to results.
+- Search-route control pass: Search now lets users choose Walk grid or Search spiral and select vegetation spacing before export.
+- After search-route control pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 19 tests run, 0 failures, 0 errors, 0 skipped.
+- After phone-helper polish pass, `.\mvnw.cmd test`: succeeded. Test result: 11 tests run, 0 failures, 0 errors, 0 skipped.
 - JaCoCo report generated at `target/site/jacoco/index.html`.
 
 
@@ -65,7 +68,7 @@ Goal: make DiscScout feel like a guided lost-disc rescue assistant for beginners
   - No disc marks yet: explain that 3-5 visible marks are enough.
   - No wind yet: offer online, manual, and calm-wind choices.
   - No estimate yet: show what inputs are still needed.
-- [ ] Add a persistent sample walkthrough banner that explains the app is using synthetic demo data.
+- [x] Add a persistent sample walkthrough banner that explains the app is using synthetic demo data.
 
 ### Phase 3: Simple Mode First, Advanced Later
 
@@ -93,8 +96,8 @@ Goal: make DiscScout feel like a guided lost-disc rescue assistant for beginners
 - [ ] Make map-tile failure look intentional by showing a useful field-style fallback canvas instead of an error-like blank state.
 - [ ] Keep release point, route, probability regions, and summary visible when tiles fail.
 - [ ] Add a visible confidence legend next to the result summary.
-- [ ] Add route selector: `Search spiral` and `Walk grid`.
-- [ ] Add vegetation spacing choices on the Search screen.
+- [x] Add route selector: `Search spiral` and `Walk grid`.
+- [x] Add vegetation spacing choices on the Search screen.
 
 ### Phase 6: Accessibility and Age-Group Review
 
