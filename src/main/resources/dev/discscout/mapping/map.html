@@ -15,9 +15,15 @@
     button { border: 1px solid #9db49f; border-radius: 6px; background: white; color: #17231c; padding: .25rem .55rem; font: inherit; cursor: pointer; }
     .dark button { background: #18211c; color: #eef5ed; border-color: #52675a; }
     #map { position: relative; overflow: hidden; min-block-size: 420px; background: #d8e2d2; }
-    .tile { position: absolute; inline-size: 256px; block-size: 256px; image-rendering: auto; }
-    .tile-missing { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 1rem; background: linear-gradient(135deg, #d9e5d5, #f4f0dd); color: #243229; }
-    .dark .tile-missing { background: linear-gradient(135deg, #1b2a22, #2a2c20); color: #eef5ed; }
+    .field-fallback { position: absolute; inset: 0; z-index: 0; background: linear-gradient(90deg, rgba(48,92,58,.10) 1px, transparent 1px), linear-gradient(0deg, rgba(48,92,58,.10) 1px, transparent 1px), linear-gradient(135deg, #d7e5d3 0%, #e9ecd8 48%, #c7d9c1 100%); background-size: 56px 56px, 56px 56px, auto; }
+    .field-fallback::before { content: ""; position: absolute; inset: 12% -10%; transform: rotate(-18deg); background: linear-gradient(90deg, transparent 0 22%, rgba(255,255,255,.34) 22% 26%, transparent 26% 48%, rgba(255,255,255,.28) 48% 52%, transparent 52% 74%, rgba(255,255,255,.34) 74% 78%, transparent 78%); }
+    .field-fallback::after { content: ""; position: absolute; inset: 18% 12%; border: 2px dashed rgba(36,90,63,.28); border-radius: 50%; transform: rotate(14deg); }
+    .dark .field-fallback { background: linear-gradient(90deg, rgba(185,205,184,.10) 1px, transparent 1px), linear-gradient(0deg, rgba(185,205,184,.10) 1px, transparent 1px), linear-gradient(135deg, #18251d 0%, #243026 48%, #1a2d22 100%); background-size: 56px 56px, 56px 56px, auto; }
+    .tile { position: absolute; inline-size: 256px; block-size: 256px; image-rendering: auto; z-index: 2; }
+    .tile-status { position: absolute; inset-inline-start: .75rem; inset-block-start: 5.3rem; z-index: 30; max-inline-size: min(460px, calc(100% - 1.5rem)); padding: .55rem .7rem; border: 1px solid #b8c8b6; border-radius: 7px; background: #ffffffe8; color: #243229; box-shadow: 0 2px 12px #0002; }
+    .tile-status strong { display: block; margin-block-end: .2rem; }
+    .dark .tile-status { background: #101914e8; color: #eef5ed; border-color: #4b5d52; }
+    .is-loaded .tile-status { display: none; }
     .marker { position: absolute; inline-size: 18px; block-size: 18px; border-radius: 50%; transform: translate(-50%, -50%); border: 3px solid white; box-shadow: 0 1px 8px #0009; z-index: 20; }
     .release { background: #1e7d4e; }
     .median { background: #d43d2b; }
@@ -46,8 +52,9 @@
     <span class="zoom"><button type="button" onclick="zoomBy(1)">+</button><button type="button" onclick="zoomBy(-1)">-</button></span>
   </div>
   <div id="map">
+    <div class="field-fallback" aria-hidden="true"></div>
     <div id="tiles"></div>
-    <div id="missing" class="tile-missing">Map tiles have not loaded yet. Probability overlays still work.</div>
+    <div id="tileStatus" class="tile-status" role="status"><strong>Field sketch mode</strong><span id="tileMessage">Loading map tiles. Search overlays are already usable.</span></div>
     <div id="p95" class="ellipse p95"></div>
     <div id="p80" class="ellipse p80"></div>
     <div id="p50" class="ellipse p50"></div>
@@ -91,7 +98,8 @@
       const releaseX = medianX + (releasePx.x - center.x);
       const releaseY = medianY + (releasePx.y - center.y);
 
-      renderTiles(w, h, center, data.tileUrl);
+      map.classList.remove('is-loaded');
+      renderTiles(w, h, center, data.tileUrl, data.attribution);
       renderRoute(data.route || [], center, w, h);
       place('release', releaseX, releaseY);
       place('median', medianX, medianY);
@@ -112,29 +120,46 @@
       document.getElementById('attribution').textContent = data.attribution;
     }
 
-    function renderTiles(w, h, center, template) {
+    function renderTiles(w, h, center, template, attribution) {
+      const map = document.getElementById('map');
       const tiles = document.getElementById('tiles');
+      const tileMessage = document.getElementById('tileMessage');
       tiles.replaceChildren();
       const startX = Math.floor((center.x - w / 2) / 256);
       const endX = Math.floor((center.x + w / 2) / 256);
       const startY = Math.floor((center.y - h / 2) / 256);
       const endY = Math.floor((center.y + h / 2) / 256);
       let loaded = 0;
-      const missing = document.getElementById('missing');
-      missing.style.display = 'grid';
+      let failed = 0;
+      let requested = 0;
+      tileMessage.textContent = 'Loading map tiles. Search overlays are already usable.';
+      const updateStatus = () => {
+        if (loaded > 2) {
+          map.classList.add('is-loaded');
+          return;
+        }
+        if (failed > 0 && failed + loaded >= requested) {
+          tileMessage.textContent = `Map tiles are unavailable right now (${failed} failed). Field sketch mode keeps the route, release point, and probability zones visible.`;
+        }
+      };
       for (let x = startX; x <= endX; x++) {
         for (let y = startY; y <= endY; y++) {
+          requested += 1;
           const img = document.createElement('img');
           img.className = 'tile';
           img.alt = '';
           img.decoding = 'async';
+          img.referrerPolicy = 'no-referrer';
           img.src = template.replace('{z}', zoom).replace('{x}', x).replace('{y}', y);
           img.style.insetInlineStart = (x * 256 - center.x + w / 2) + 'px';
           img.style.insetBlockStart = (y * 256 - center.y + h / 2) + 'px';
-          img.onload = () => { loaded += 1; if (loaded > 2) missing.style.display = 'none'; };
+          img.onload = () => { loaded += 1; updateStatus(); };
+          img.onerror = () => { failed += 1; img.remove(); updateStatus(); };
           tiles.appendChild(img);
         }
       }
+      window.clearTimeout(renderTiles.statusTimer);
+      renderTiles.statusTimer = window.setTimeout(updateStatus, 2400);
     }
 
     function renderRoute(route, center, w, h) {

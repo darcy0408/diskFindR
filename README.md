@@ -35,7 +35,7 @@ or:
 
 The main screen is organized as **Setup -> Video -> Mark Disc -> Wind -> Estimate -> Search**. For the fastest walkthrough, choose **Open Sample Project**; DiscScout loads synthetic non-personal data, opens Mark Disc with sample observations, and shows a Sample Mode banner that guides the judge through Wind, Estimate, and Search.
 
-The map uses OpenStreetMap tiles by default and keeps overlays working even when aerial credentials are missing or tiles fail to load. On the Search step, users can switch between a walk-grid route and a search-spiral route, then choose vegetation spacing before exporting.
+The map uses OpenStreetMap tiles by default. If tiles fail or aerial credentials are missing, DiscScout switches to an intentional field-sketch fallback while keeping the release point, probability zones, route, and safety notes visible. On the Search step, users can switch between a walk-grid route and a search-spiral route, then choose vegetation spacing before exporting.
 ## Aerial Map Key
 
 DiscScout works without aerial credentials by falling back to an OpenStreetMap-compatible development basemap. To use MapTiler satellite tiles, create `config/local.properties` or set environment variables:

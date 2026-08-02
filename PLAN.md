@@ -37,6 +37,8 @@ Last updated: 2026-08-01
 - Sample walkthrough polish pass: Open Sample Project now starts on Mark Disc with a persistent Sample Mode banner instead of skipping directly to results.
 - Search-route control pass: Search now lets users choose Walk grid or Search spiral and select vegetation spacing before export.
 - Confidence legend pass: Search now explains the 50, 80, and 95 percent regions next to the result summary.
+- Map fallback pass: WebView map now shows an intentional field-sketch background and tile-status message when raster tiles fail, while overlays remain visible.
+- After map-fallback pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 19 tests run, 0 failures, 0 errors, 0 skipped.
 - After confidence-legend pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 19 tests run, 0 failures, 0 errors, 0 skipped.
 - After search-route control pass, `$env:JAVA_HOME=(Resolve-Path .jdk\\jdk-26.0.2).Path; $env:Path="$env:JAVA_HOME\\bin;$env:Path"; .\\mvnw.cmd clean verify`: succeeded. Test result: 19 tests run, 0 failures, 0 errors, 0 skipped.
 - After phone-helper polish pass, `.\mvnw.cmd test`: succeeded. Test result: 11 tests run, 0 failures, 0 errors, 0 skipped.
@@ -95,8 +97,8 @@ Goal: make DiscScout feel like a guided lost-disc rescue assistant for beginners
 
 ### Phase 5: Map and Search Confidence
 
-- [ ] Make map-tile failure look intentional by showing a useful field-style fallback canvas instead of an error-like blank state.
-- [ ] Keep release point, route, probability regions, and summary visible when tiles fail.
+- [x] Make map-tile failure look intentional by showing a useful field-style fallback canvas instead of an error-like blank state.
+- [x] Keep release point, route, probability regions, and summary visible when tiles fail.
 - [x] Add a visible confidence legend next to the result summary.
 - [x] Add route selector: `Search spiral` and `Walk grid`.
 - [x] Add vegetation spacing choices on the Search screen.
