@@ -21,7 +21,9 @@ final class PhoneHelperServerTest {
 
       assertEquals(200, response.statusCode());
       assertTrue(response.body().contains(server.sessionCode()));
+      assertTrue(response.body().contains("/qr.png"));
       assertTrue(response.body().contains("Use My Location For Tee"));
+      assertTrue(response.body().contains("Send Pasted GPS Coordinates"));
     }
   }
 
@@ -58,6 +60,20 @@ final class PhoneHelperServerTest {
           HttpResponse.BodyHandlers.ofString());
 
       assertEquals(403, response.statusCode());
+    }
+  }
+
+  @Test
+  void servesQrCodePngForHelperUrl() throws Exception {
+    try (var server = new PhoneHelperServer(update -> {})) {
+      server.start();
+      var response = HttpClient.newHttpClient().send(
+          HttpRequest.newBuilder(URI.create("http://localhost:%d/qr.png".formatted(server.port()))).GET().build(),
+          HttpResponse.BodyHandlers.ofByteArray());
+
+      assertEquals(200, response.statusCode());
+      assertEquals("image/png", response.headers().firstValue("Content-Type").orElse(""));
+      assertTrue(response.body().length > 100);
     }
   }
 }

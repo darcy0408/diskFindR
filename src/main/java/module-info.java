@@ -6,6 +6,8 @@ module dev.discscout {
   requires javafx.media;
   requires com.fasterxml.jackson.databind;
   requires com.fasterxml.jackson.datatype.jsr310;
+  requires com.google.zxing;
+  requires com.google.zxing.javase;
   requires org.bytedeco.javacv;
 
   exports dev.discscout.app;

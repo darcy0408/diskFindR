@@ -7,3 +7,4 @@
 - Optional tripod, bag, bench, or stable object
 - Optional printed calibration marker
 - Optional MapTiler key for satellite imagery
+- ZXing 3.5.4 for local QR-code generation.

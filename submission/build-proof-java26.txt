@@ -1,5 +1,5 @@
 DiscScout Java 26 build proof
-Generated: 2026-08-01T17:06:14.7296338-06:00
+Generated: 2026-08-01T18:15:39.1047316-06:00
 
 java -version
 java version "26.0.2" 2026-07-21
@@ -49,21 +49,21 @@ mvnw.cmd clean verify
 [INFO] Running dev.discscout.geodesy.GeoCalculatorTest
 [INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.discscout.geodesy.GeoCalculatorTest
 [INFO] Running dev.discscout.mobile.PhoneHelperServerTest
-[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.129 s -- in dev.discscout.mobile.PhoneHelperServerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.217 s -- in dev.discscout.mobile.PhoneHelperServerTest
 [INFO] Running dev.discscout.persistence.ProjectStoreTest
-[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.145 s -- in dev.discscout.persistence.ProjectStoreTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.129 s -- in dev.discscout.persistence.ProjectStoreTest
 [INFO] Running dev.discscout.physics.FlightSimulatorTest
-[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.discscout.physics.FlightSimulatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.discscout.physics.FlightSimulatorTest
 [INFO] Running dev.discscout.search.SearchRouteGeneratorTest
 [INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.discscout.search.SearchRouteGeneratorTest
 [INFO] Running dev.discscout.simulation.MonteCarloSimulatorTest
-[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in dev.discscout.simulation.MonteCarloSimulatorTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in dev.discscout.simulation.MonteCarloSimulatorTest
 [INFO] Running dev.discscout.triangulation.TriangulatorTest
-[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.discscout.triangulation.TriangulatorTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.discscout.triangulation.TriangulatorTest
 [INFO] 
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] 
 [INFO] --- jar:3.5.0:jar (default-jar) @ discscout ---
@@ -75,7 +75,7 @@ mvnw.cmd clean verify
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  6.823 s
-[INFO] Finished at: 2026-08-01T17:06:24-06:00
+[INFO] Total time:  6.837 s
+[INFO] Finished at: 2026-08-01T18:15:48-06:00
 [INFO] ------------------------------------------------------------------------
 

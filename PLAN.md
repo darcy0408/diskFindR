@@ -33,6 +33,7 @@ Last updated: 2026-07-31
 - Nearby course picker pass: added OSM/Overpass course, tee, and basket parser with fixture tests; Setup can search public OSM features and fill tee coordinate/bearing from selected data.
 - Click-to-mark pass: Mark Disc now displays the imported video, accepts click marks, draws marker/trail overlays, supports undo/delete, and adjusts simulation uncertainty from mark count.
 - Phone helper location pass: added local HTTP helper with six-digit session code, browser geolocation request, session-checked location callback, tests, and Setup controls. HTTPS requirements may block geolocation on some phone LAN browsers.
+- Phone helper polish pass: added local ZXing QR-code generation and manual pasted-GPS fallback on the helper page.
 - Test result: 11 tests run, 0 failures, 0 errors, 0 skipped.
 - JaCoCo report generated at `target/site/jacoco/index.html`.
 
@@ -126,7 +127,7 @@ Goal: make DiscScout feel like a guided lost-disc rescue assistant for beginners
 - Add true frame-forward/frame-back controls and timeline scrubbing over decoded video frames.
 - Add real optical-flow assisted tracking.
 - Replace calibration placeholder with generated/detected OpenCV ArUco marker board.
-- Implement mobile upload session code/QR page.
+- Implement mobile upload session code/QR page; video upload remains pending.
 - Add Precision Mode UI for synchronized two-video marking and fallback comparison.
 - Add diagnostic bundle creation and privacy scrubbing.
 - Capture screenshots and record the 90-120 second demonstration video.

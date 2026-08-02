@@ -10,7 +10,7 @@
 - [x] Public OSM course/tee lookup is implemented with manual fallback.
 - [x] Local phone helper exists for optional browser location permission.
 - [x] Java 26 build proof is captured in `submission/build-proof-java26.txt`.
-- [x] Latest verification: `mvnw.cmd clean verify` passed with 18 tests.
+- [x] Latest verification: `mvnw.cmd clean verify` passed with 19 tests.
 - [x] No local JDK, screenshots, videos, project media, API keys, or local config are intended for commit.
 
 ## Must Do Before Hackster Submit
