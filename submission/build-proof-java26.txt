@@ -1,5 +1,5 @@
 DiscScout Java 26 build proof
-Generated: 2026-08-02T11:54:13-06:00
+Generated: 2026-08-12T19:07:07-06:00
 
 java -version
 java version "26.0.2" 2026-07-21
@@ -14,4 +14,4 @@ mvnw.cmd clean verify
 [INFO] Building jar: C:\dev\disk-golf\target\discscout-0.1.0.jar
 [INFO] JaCoCo report generated for 58 classes.
 [INFO] BUILD SUCCESS
-[INFO] Finished at: 2026-08-02T11:54:13-06:00
+[INFO] Finished at: 2026-08-12T19:07:07-06:00
