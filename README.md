@@ -49,7 +49,7 @@ Do not commit local credentials.
 
 ## Sample Project
 
-Use **Open Sample Project** from the welcome screen. The sample uses synthetic, non-personal coordinates and generated tracking observations.
+Use **Open Sample Project** from the welcome screen. The sample tees off at a real public course — Valmont Disc Golf Course in Boulder, Colorado, which is fully mapped in OpenStreetMap (18 tees, 18 baskets) — with synthetic, generated tracking observations. Because the default coordinate sits on a mapped course, **Find Nearby Courses** returns real results out of the box.
 
 
 

@@ -603,9 +603,9 @@ public final class DiscScoutApplication extends Application {
   }
 
   private void initializeInputs() {
-    latitude = field("39.7392");
-    longitude = field("-104.9903");
-    bearing = field("45");
+    latitude = field("40.027676");
+    longitude = field("-105.237863");
+    bearing = field("330");
     speed = slider(4, 35, 22);
     launch = slider(-5, 30, 8);
     hyzer = slider(-25, 25, 0);
@@ -978,8 +978,8 @@ public final class DiscScoutApplication extends Application {
   private DiscScoutProject sampleProject() {
     var p = new DiscScoutProject();
     p.name = "DiscScout Sample Project";
-    p.releasePoint = new GeoPoint(39.7392, -104.9903);
-    p.bearingDegrees = 42.0;
+    p.releasePoint = new GeoPoint(40.027676, -105.237863);
+    p.bearingDegrees = 330.0;
     p.trackingPoints.add(new TrackingObservation.ManualPoint(105, 301, 260, 0.9));
     p.trackingPoints.add(new TrackingObservation.ManualPoint(110, 344, 238, 0.85));
     p.trackingPoints.add(new TrackingObservation.ManualPoint(115, 389, 221, 0.8));
