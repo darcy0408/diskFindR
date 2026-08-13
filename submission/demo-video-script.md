@@ -19,7 +19,7 @@ the recording on the Welcome screen.
 7. Estimate Landing Zone: 500 Monte Carlo throws guarded by plausibility regression
    tests (distance, hang time, wind response).
 8. Search map: solid 50 / dashed 80 / dotted 95 percent zones over the real course —
-   "not a fake exact dot". Route controls, safety language, export.
+   framed honestly: no app can know the exact spot. Route controls, safety language, export.
 9. Course lookup: Find Nearby Courses pulls Valmont's real tees from OpenStreetMap;
    Use Selected Tee aims the throw direction at the nearest mapped basket — map data,
    never the video. Unmapped courses stay fully manual and editable.

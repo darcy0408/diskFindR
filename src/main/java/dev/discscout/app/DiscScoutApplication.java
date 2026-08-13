@@ -245,7 +245,7 @@ public final class DiscScoutApplication extends Application {
     var how = actionCard("Recording Setup", "Stable phone, early flight visible", "Landscape and 60 FPS help, but manual marking keeps the app usable.");
     how.setOnAction(e -> log(recordingInstructions()));
 
-    var title = new Label("Find the search zone, not a fake exact dot");
+    var title = new Label("Find the search zone — no app can know the exact spot");
     title.getStyleClass().add("screen-title");
     var caption = new Label("Follow the steps on the left. The sample path is the fastest way to see the finished experience.");
     caption.getStyleClass().add("screen-caption");
