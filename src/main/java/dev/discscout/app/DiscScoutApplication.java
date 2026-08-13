@@ -3,6 +3,7 @@ package dev.discscout.app;
 import dev.discscout.course.DiscGolfCourse;
 import dev.discscout.course.DiscGolfTee;
 import dev.discscout.course.OverpassDiscGolfClient;
+import dev.discscout.geodesy.GeoCalculator;
 import dev.discscout.domain.DiscProfile;
 import dev.discscout.domain.DiscWeightClass;
 import dev.discscout.domain.GeoPoint;
@@ -43,6 +44,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
@@ -96,6 +99,7 @@ public final class DiscScoutApplication extends Application {
   private Label windSummary;
   private Label courseSummary;
   private Label phoneHelperSummary;
+  private ImageView phoneHelperQr;
   private boolean attemptedWindFetch;
   private boolean sampleMode;
   private PhoneHelperServer phoneHelperServer;
@@ -267,7 +271,12 @@ public final class DiscScoutApplication extends Application {
     stop.setOnAction(e -> stopPhoneHelper());
     var controls = new HBox(8, start, stop);
     controls.getStyleClass().add("command-row");
-    var box = new VBox(8, screenTitle("Use phone location"), phoneHelperSummary, controls);
+    phoneHelperQr = new ImageView();
+    phoneHelperQr.setFitWidth(240);
+    phoneHelperQr.setFitHeight(240);
+    phoneHelperQr.setVisible(false);
+    phoneHelperQr.setManaged(false);
+    var box = new VBox(8, screenTitle("Use phone location"), phoneHelperSummary, controls, phoneHelperQr);
     box.getStyleClass().add("lookup-card");
     return box;
   }
@@ -278,8 +287,11 @@ public final class DiscScoutApplication extends Application {
         phoneHelperServer = new PhoneHelperServer(this::acceptPhoneLocation);
       }
       phoneHelperServer.start();
-      phoneHelperSummary.setText("Phone helper running. Session %s. Open %s on this computer, or try %s from a phone on the same network. If phone geolocation is blocked, use public course lookup or manual placement.".formatted(
-          phoneHelperServer.sessionCode(), phoneHelperServer.localUrl(), phoneHelperServer.networkUrl()));
+      phoneHelperSummary.setText("Phone helper running. Session %s. Scan the QR below with your phone camera, or open %s from a phone on the same network. If phone geolocation is blocked, use public course lookup or manual placement.".formatted(
+          phoneHelperServer.sessionCode(), phoneHelperServer.networkUrl()));
+      phoneHelperQr.setImage(new Image(phoneHelperServer.localUrl().replace("/?code=", "/qr.png?code="), true));
+      phoneHelperQr.setVisible(true);
+      phoneHelperQr.setManaged(true);
       log("Phone helper started with session " + phoneHelperServer.sessionCode() + ". No location is stored until the user sends it from the helper page.");
     } catch (RuntimeException ex) {
       phoneHelperSummary.setText("Could not start the phone helper. Use public course lookup or manual placement.");
@@ -294,6 +306,11 @@ public final class DiscScoutApplication extends Application {
     }
     if (phoneHelperSummary != null) {
       phoneHelperSummary.setText("Phone helper stopped. Start it again when you want to send a tee location from a browser.");
+    }
+    if (phoneHelperQr != null) {
+      phoneHelperQr.setImage(null);
+      phoneHelperQr.setVisible(false);
+      phoneHelperQr.setManaged(false);
     }
   }
 
@@ -359,6 +376,8 @@ public final class DiscScoutApplication extends Application {
       nearbyTees.setItems(FXCollections.observableArrayList());
       return;
     }
+    nearbyTees.setCellFactory(list -> teeCell(selected));
+    nearbyTees.setButtonCell(teeCell(selected));
     nearbyTees.setItems(FXCollections.observableArrayList(selected.tees()));
     if (!selected.tees().isEmpty()) {
       nearbyTees.getSelectionModel().selectFirst();
@@ -379,8 +398,33 @@ public final class DiscScoutApplication extends Application {
     attemptedWindFetch = false;
     refreshMap();
     courseSummary.setText(suggestedBearing.isPresent()
-        ? "Using %s at %s. Throw direction filled from matching/nearest basket. You can still correct it in Estimate.".formatted(tee, course.name())
-        : "Using %s at %s. Basket direction was not mapped, so keep or edit the throw direction in Estimate.".formatted(tee, course.name()));
+        ? "Using %s at %s. Throw direction filled from matching/nearest basket. You can still correct it in Estimate.".formatted(teeLabel(course, tee), course.name())
+        : "Using %s at %s. Basket direction was not mapped, so keep or edit the throw direction in Estimate.".formatted(teeLabel(course, tee), course.name()));
+  }
+
+  private ListCell<DiscGolfTee> teeCell(DiscGolfCourse course) {
+    return new ListCell<>() {
+      @Override
+      protected void updateItem(DiscGolfTee tee, boolean empty) {
+        super.updateItem(tee, empty);
+        setText(empty || tee == null ? null : teeLabel(course, tee));
+      }
+    };
+  }
+
+  private static String teeLabel(DiscGolfCourse course, DiscGolfTee tee) {
+    if (tee.ref() != null && !tee.ref().isBlank()) {
+      return "Tee " + tee.ref();
+    }
+    var meters = GeoCalculator.distanceMeters(course.coordinate(), tee.coordinate());
+    var bearing = GeoCalculator.bearingDegrees(course.coordinate(), tee.coordinate());
+    return "Tee — %.0f m %s of course center (no hole number in OSM)".formatted(meters, compassDirection(bearing));
+  }
+
+  private static String compassDirection(double bearingDegrees) {
+    var directions = new String[] {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+    var normalized = ((bearingDegrees % 360) + 360) % 360;
+    return directions[(int) Math.round(normalized / 45.0) % 8];
   }
   private Node importPane(Stage stage) {
     videoEmpty = new Label("No video yet. Import an MP4/MOV from your phone, or use Open Sample Project from Setup to try DiscScout without your own footage.");
