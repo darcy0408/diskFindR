@@ -24,3 +24,13 @@ DiscScout should use OpenStreetMap/Overpass as the public course and tee-coordin
 A six-hats review found the original lift model was too ballistic and under-predicted realistic throws. The MVP model is now calibrated to plausibility guardrails rather than laboratory aerodynamics: a generic distance driver at 26 m/s and 12 degrees should land in the 95-125 m range with 3.5-6.5 s hang time; putter and distance-driver profiles must differ materially; strong wind must move the landing point materially. These are regression targets until field-thrown calibration data replaces them.
 
 The Monte Carlo search anchor is now an actual simulated landing sample closest to the cloud center, avoiding an independent east/north median that could fall away from the simulated landing cloud.
+
+## 2026-08-13: Screenshot-Driven UX Pass
+
+A fresh-user walkthrough via screenshots surfaced fixes applied before submission media:
+
+- The disc ComboBox rendered the raw `DiscProfile` record `toString`, which also crushed every simple-mode label to an ellipsis. It now renders `displayName · speed | glide | turn | fade` via a shared cell factory. Flight numbers are the vocabulary disc golfers already know.
+- The map no longer draws placeholder probability zones before an estimate has run. `mapJson` sends `hasEstimate`, and the map hides the ellipses, median marker, and throw arrow until a simulation succeeds, labeling the coordinate pill "run Estimate to draw zones". Unrun zones read as real results, which violates the honest-uncertainty rule.
+- Probability zones are distinguishable without color: 50% solid, 80% dashed, 95% dotted, matched in both legends.
+- The Mark Disc canvas text now acknowledges loaded sample marks instead of claiming "No video yet" underneath a visible mark trail.
+- Wind is shown in m/s and mph (US players think in mph); the bearing field is labeled in degrees.

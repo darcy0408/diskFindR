@@ -29,8 +29,8 @@
     .median { background: #d43d2b; }
     .ellipse { position: absolute; border-radius: 50%; transform: translate(-50%, -50%) rotate(var(--angle)); pointer-events: none; z-index: 12; }
     .p50 { border: 3px solid rgba(28,111,75,.95); background: rgba(28,111,75,.16); }
-    .p80 { border: 3px solid rgba(218,148,25,.95); background: rgba(218,148,25,.14); }
-    .p95 { border: 3px solid rgba(195,52,42,.9); background: rgba(195,52,42,.11); }
+    .p80 { border: 3px dashed rgba(218,148,25,.95); background: rgba(218,148,25,.14); }
+    .p95 { border: 3px dotted rgba(195,52,42,.9); background: rgba(195,52,42,.11); }
     .arrow { position: absolute; block-size: 4px; background: #24628e; transform-origin: left center; z-index: 15; box-shadow: 0 1px 4px #fff; }
     #routeLayer { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; z-index: 16; pointer-events: none; }
     .route-line { fill: none; stroke: #185f9e; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 8 8; filter: drop-shadow(0 1px 2px #fff); }
@@ -64,8 +64,8 @@
     <div id="median" class="marker median" title="Median search anchor"></div>
     <div class="legend">
       <div class="legend-row"><span class="swatch" style="color:#1c6f4b"></span>50 percent</div>
-      <div class="legend-row"><span class="swatch" style="color:#da9419"></span>80 percent</div>
-      <div class="legend-row"><span class="swatch" style="color:#c3342a"></span>95 percent</div>
+      <div class="legend-row"><span class="swatch" style="color:#da9419;border-style:dashed"></span>80 percent</div>
+      <div class="legend-row"><span class="swatch" style="color:#c3342a;border-style:dotted"></span>95 percent</div>
       <div class="legend-row"><span class="swatch" style="color:#185f9e"></span>search route</div>
     </div>
     <div id="note" class="note"></div>
@@ -103,6 +103,10 @@
       renderRoute(data.route || [], center, w, h);
       place('release', releaseX, releaseY);
       place('median', medianX, medianY);
+      const hasEstimate = data.hasEstimate !== false;
+      for (const id of ['p50', 'p80', 'p95', 'median', 'arrow']) {
+        document.getElementById(id).style.display = hasEstimate ? '' : 'none';
+      }
       ellipse('p50', medianX, medianY, data.ellipses[0], data.orientation);
       ellipse('p80', medianX, medianY, data.ellipses[1], data.orientation);
       ellipse('p95', medianX, medianY, data.ellipses[2], data.orientation);
@@ -114,7 +118,9 @@
       arrow.style.insetBlockStart = releaseY + 'px';
       arrow.style.transform = `rotate(${Math.atan2(medianY - releaseY, medianX - releaseX)}rad)`;
 
-      document.getElementById('coords').textContent = `Median ${data.median.lat.toFixed(5)}, ${data.median.lon.toFixed(5)}`;
+      document.getElementById('coords').textContent = hasEstimate
+        ? `Median ${data.median.lat.toFixed(5)}, ${data.median.lon.toFixed(5)}`
+        : `Release ${data.release.lat.toFixed(5)}, ${data.release.lon.toFixed(5)} — run Estimate to draw zones`;
       document.getElementById('confidence').textContent = `Confidence: ${data.confidence}`;
       document.getElementById('note').textContent = data.message;
       document.getElementById('attribution').textContent = data.attribution;

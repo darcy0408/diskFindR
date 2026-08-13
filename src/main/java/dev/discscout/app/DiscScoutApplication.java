@@ -42,6 +42,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
@@ -493,7 +494,7 @@ public final class DiscScoutApplication extends Application {
     addRow(simpleGrid, s++, "Disc weight", discWeight);
     addRow(simpleGrid, s++, "Throw style", throwType);
     addRow(simpleGrid, s++, "Handedness", handedness);
-    addRow(simpleGrid, s++, "Throw direction", bearing);
+    addRow(simpleGrid, s++, "Throw direction (degrees)", bearing);
 
     var advancedGrid = new GridPane();
     advancedGrid.getStyleClass().add("input-grid");
@@ -582,6 +583,8 @@ public final class DiscScoutApplication extends Application {
     vegetation.getSelectionModel().select(SearchRouteGenerator.Vegetation.LIGHT_BRUSH);
     vegetation.setOnAction(e -> updateSearchRouteFromControls());
     disc = new ComboBox<>(FXCollections.observableArrayList(DiscProfile.builtIns()));
+    disc.setCellFactory(list -> discProfileCell());
+    disc.setButtonCell(discProfileCell());
     disc.getSelectionModel().select(2);
     discWeight = new ComboBox<>(FXCollections.observableArrayList(DiscWeightClass.values()));
     discWeight.getSelectionModel().select(DiscWeightClass.NORMAL);
@@ -666,6 +669,17 @@ public final class DiscScoutApplication extends Application {
     }
     return new MeasurementUncertainty(1.8, 6.0, 3.5, 5.0, 1.8, 18.0, 0.22, 7.0);
   }
+  private ListCell<DiscProfile> discProfileCell() {
+    return new ListCell<>() {
+      @Override
+      protected void updateItem(DiscProfile item, boolean empty) {
+        super.updateItem(item, empty);
+        setText(empty || item == null ? null
+            : "%s · %.0f | %.0f | %.0f | %.0f".formatted(item.displayName(), item.speed(), item.glide(), item.turn(), item.fade()));
+      }
+    };
+  }
+
   private DiscProfile selectedDiscProfile() {
     var selected = disc.getSelectionModel().getSelectedItem();
     var weight = discWeight.getSelectionModel().getSelectedItem();
@@ -691,7 +705,7 @@ public final class DiscScoutApplication extends Application {
           windSpeed.setText("%.1f".formatted(result.wind().speedMps()));
           windDirection.setText("%.0f".formatted(result.wind().directionFromDegrees()));
           windGust.setText("%.1f".formatted(result.wind().gustMps()));
-          var summary = "Nearby wind loaded: %.1f m/s from %.0f degrees, gusting %.1f m/s. Source: %s.".formatted(result.wind().speedMps(), result.wind().directionFromDegrees(), result.wind().gustMps(), result.wind().source().label());
+          var summary = "Nearby wind loaded: %.1f m/s (%.0f mph) from %.0f degrees, gusting %.1f m/s (%.0f mph). Source: %s.".formatted(result.wind().speedMps(), result.wind().speedMps() * 2.23694, result.wind().directionFromDegrees(), result.wind().gustMps(), result.wind().gustMps() * 2.23694, result.wind().source().label());
           if (windSummary != null) windSummary.setText(summary);
           log(result.message() + " Source: " + result.wind().source().label());
         }))
@@ -728,8 +742,8 @@ public final class DiscScoutApplication extends Application {
     var confidence = outcome == null ? "not run" : outcome.confidenceLabel();
     var provider = startupContext.config().mapProvider();
     return """
-        {"release":{"lat":%.8f,"lon":%.8f},"median":{"lat":%.8f,"lon":%.8f},"ellipses":[%.2f,%.2f,%.2f],"orientation":%.2f,"confidence":"%s","tileUrl":"%s","attribution":"%s","message":"%s","route":%s}
-        """.formatted(release.latitude(), release.longitude(), median.latitude(), median.longitude(), fifty, eighty, ninetyFive, orientation,
+        {"release":{"lat":%.8f,"lon":%.8f},"median":{"lat":%.8f,"lon":%.8f},"hasEstimate":%s,"ellipses":[%.2f,%.2f,%.2f],"orientation":%.2f,"confidence":"%s","tileUrl":"%s","attribution":"%s","message":"%s","route":%s}
+        """.formatted(release.latitude(), release.longitude(), median.latitude(), median.longitude(), outcome != null, fifty, eighty, ninetyFive, orientation,
         json(confidence), json(provider.tileUrl()), json(provider.attribution()), json(startupContext.config().message()), routeJson());
   }
 
@@ -754,7 +768,7 @@ public final class DiscScoutApplication extends Application {
   }
 
   private String defaultConfidenceLegend(String confidence) {
-    return "Confidence legend\n50%: tightest likely zone\n80%: search this first\n95%: wider backup zone\nCurrent: " + confidence;
+    return "Confidence legend\n50% (solid): tightest likely zone\n80% (dashed): search this first\n95% (dotted): wider backup zone\nCurrent: " + confidence;
   }
 
   private void export() {
@@ -824,6 +838,16 @@ public final class DiscScoutApplication extends Application {
     if (markSummary != null) {
       markSummary.setText(markSummaryText());
     }
+    updateVideoEmptyText();
+  }
+
+  private void updateVideoEmptyText() {
+    if (videoEmpty == null) return;
+    var hasVideo = mediaPlayer != null || project.primaryVideo != null;
+    if (hasVideo) return;
+    videoEmpty.setText(trackingTable.getItems().isEmpty()
+        ? "No video yet. Import an MP4/MOV from your phone, or use Open Sample Project from Setup to try DiscScout without your own footage."
+        : "Sample marks are loaded — video is optional for this walkthrough. With your own footage, you would pause here and click the disc in each frame.");
   }
 
   private String markSummaryText() {
